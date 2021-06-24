@@ -1,19 +1,18 @@
 {
-  "name": "sebamaster-movie-backend",
+  "name": "hobb.ee-backend",
   "version": "1.0.0",
-  "description": "EBAMaster movie backend as a service",
+  "description": "Hobb.ee Backend as service",
   "main": "index.js",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/sebischair/sebamaster-movie-backend.git"
+    "url": "https://gitlab.lrz.de/seba-master-2021/team-01/backend.git"
   },
-  "author": "sebischair",
-  "license": "MIT",
+  "author": "Hobb.ee",
   "bugs": {
-    "url": "https://github.com/sebischair/sebamaster-movie-backend/issues"
+    "url": "https://gitlab.lrz.de/seba-master-2021/team-01/backend/-/issues"
   },
-  "homepage": "ttps://github.com/sebischair/sebamaster-movie-backend.git#readme",
+  "homepage": "https://hobb.ee",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./index.js",
