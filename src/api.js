@@ -17,13 +17,13 @@ api.use(bodyParser.urlencoded({ extended: false }));
 api.use(middlewares.allowCrossDomain);
 
 // Basic route
-api.get('/', (req, res) => {
+api.get('/api', (req, res) => {
     res.json({
-        name: 'SEBA Master Movie Backend'
+        name: 'Hobb.ee Backend'
     });
 });
 
 // API routes
-api.use('/auth'  , auth);
+api.use('/api/auth', auth);
 
 module.exports = api;
