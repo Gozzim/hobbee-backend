@@ -1,4 +1,6 @@
-import mongoose from "mongoose";
+"use strict";
+
+const mongoose = require("mongoose");
 
 const NotificationsSchema = new mongoose.Schema({
     user: {
@@ -33,4 +35,4 @@ const NotificationsSchema = new mongoose.Schema({
 NotificationsSchema.set("timestamps", true);
 NotificationsSchema.set("versionKey", false);
 
-export default mongoose.model("Notifications", NotificationsSchema);
+module.exports = mongoose.model("Notifications", NotificationsSchema);
