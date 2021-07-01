@@ -27,6 +27,7 @@
     "mongoose": "^5.0.7"
   },
   "devDependencies": {
+    "date-fns": "^2.22.1",
     "nodemon": "1.14.12"
   }
 }
