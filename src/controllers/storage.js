@@ -10,7 +10,7 @@ const getUserNotifications = async (req, res) => {
         const response = await NotificationModel.find({
             user: req.userId,
             date: {$gt: since}
-        }).select("_id date read content").sort("date").exec();
+        }).select("_id group notificationType date read content").sort("date").exec();
 
         return res.status(200).json(response);
     } catch (e) {
