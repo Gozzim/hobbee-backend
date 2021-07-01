@@ -4,32 +4,30 @@ const mongoose = require("mongoose");
 
 const NotificationsSchema = new mongoose.Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectID,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
+    group: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+    },
+    notificationType: {
+        type: String,
+        enum: ["Chat", "Reminder", "Feedback"],
+    },
     date: {
         type: Date,
-        required: true
+        default: Date.now,
     },
-    unread: {
+    read: {
         type: Boolean,
-        default: true
+        default: false
     },
     content: {
-        type: {
-            notificationType: {
-                type: String,
-                enum: ["Chat", "Reminder", "Feedback"],
-                required: true
-            }
-        },
-        notificationContent: {
-            type: String,
-            required: true
-        },
+        type: String,
         required: true
-    }
+    },
 });
 
 NotificationsSchema.set("timestamps", true);
