@@ -18,7 +18,7 @@ const GroupSchema = new mongoose.Schema({
     required: true,
   },
   tags: {
-    type: [String],
+    type: [ObjectId],
     required: true,
   },
   pic: {

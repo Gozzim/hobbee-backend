@@ -6,8 +6,14 @@ const TagSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  category: {
+    type: String,
+  },
+  subCategory: {
+    type: String,
+  },
 });
 
 TagSchema.set("versionKey", false);
 
-module.exports = TagSchema;
+module.exports = mongoose.model("Tag", TagSchema);

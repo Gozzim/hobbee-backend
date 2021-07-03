@@ -16,7 +16,6 @@ const create = async (req, res) => {
       description: req.body.description,
     };
 
-    // create the user in the database
     let retGroup = await GroupModel.create(group);
     console.log(retGroup);
   } catch (err) {
