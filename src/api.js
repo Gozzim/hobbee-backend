@@ -1,13 +1,13 @@
 "use strict";
 
-const express    = require('express');
-const bodyParser = require('body-parser');
-const helmet     = require('helmet');
+const express = require("express");
+const bodyParser = require("body-parser");
+const helmet = require("helmet");
 
-const middlewares = require('./middlewares');
+const middlewares = require("./middlewares");
 
-const auth  = require('./routes/auth');
-const storage  = require('./routes/storage');
+const auth = require("./routes/auth");
+const storage = require("./routes/storage");
 
 const api = express();
 
@@ -18,14 +18,14 @@ api.use(bodyParser.urlencoded({ extended: false }));
 api.use(middlewares.allowCrossDomain);
 
 // Basic route
-api.get('/api', (req, res) => {
-    res.json({
-        name: 'Hobb.ee Backend'
-    });
+api.get("/api", (req, res) => {
+  res.json({
+    name: "Hobb.ee Backend",
+  });
 });
 
 // API routes
-api.use('/api/auth', auth);
-api.use('/api/storage', storage);
+api.use("/api/auth", auth);
+api.use("/api/storage", storage);
 
 module.exports = api;
