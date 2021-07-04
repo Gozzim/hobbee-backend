@@ -27,7 +27,6 @@ const GroupSchema = new mongoose.Schema({
   },
   participants: {
     type: Number,
-    required: true,
   },
   date: {
     type: Date,

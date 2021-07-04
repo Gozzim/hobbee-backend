@@ -2,7 +2,36 @@ const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 
 const create = async (req, res) => {
-  console.log(req.body);
+  if (!Object.prototype.hasOwnProperty.call(req.body, "groupName"))
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "The request body must contain a groupName property",
+    });
+
+  if (!Object.prototype.hasOwnProperty.call(req.body, "city"))
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "The request body must contain a city property",
+    });
+  if (!Object.prototype.hasOwnProperty.call(req.body, "how"))
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "The request body must contain a how property",
+    });
+
+  if (
+    !Object.prototype.hasOwnProperty.call(req.body, "tags") ||
+    !Array.isArray(req.body.tags)
+  )
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "The request body must contain a tags property",
+    });
+  if (!Object.prototype.hasOwnProperty.call(req.body, "pic"))
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "The request body must contain a pic property",
+    });
 
   try {
     const group = {
