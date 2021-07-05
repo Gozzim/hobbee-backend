@@ -70,7 +70,36 @@ const getTags = async (req, res) => {
   }
 };
 
+const getGroups = async (req, res) => {
+  try {
+    const groups = await GroupModel.find().exec();
+    return res.status(200).json(groups);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const getGroup = async (req, res) => {
+  const id = req.params.groupId;
+  try {
+    const groups = await GroupModel.findOne({ _id: id }).exec();
+    return res.status(200).json(groups);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   create,
   getTags,
+  getGroups,
+  getGroup,
 };
