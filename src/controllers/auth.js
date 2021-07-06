@@ -37,7 +37,7 @@ const login = async (req, res) => {
     // if user is found and password is valid
     // create a token
     const token = jwt.sign(
-      { _id: user._id, username: user.username, role: user.role },
+      { _id: user._id, username: user.username, hasPremium: user.premium },
       config.JwtSecret,
       {
         expiresIn: 86400, // expires in 24 hours
@@ -77,8 +77,10 @@ const register = async (req, res) => {
     // create a user object
     const user = {
       username: req.body.username,
+      email: req.body.email,
       password: hashedPassword,
-      role: req.body.isAdmin ? "admin" : "member",
+      hobbies: req.body.hobbies,
+      premium: false,
     };
 
     // create the user in the database
@@ -90,7 +92,7 @@ const register = async (req, res) => {
       {
         _id: retUser._id,
         username: retUser.username,
-        role: retUser.role,
+        hasPremium: retUser.premium
       },
       config.JwtSecret,
       {
@@ -119,8 +121,8 @@ const register = async (req, res) => {
 
 const me = async (req, res) => {
   try {
-    // get own user name from database
-    let user = await UserModel.findById(req.userId).select("username").exec();
+    // get own user from database
+    let user = await UserModel.findById(req.userId).select("username premium").exec();
 
     if (!user)
       return res.status(404).json({

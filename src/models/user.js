@@ -6,24 +6,41 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
+    unique: true,
     required: true,
+    validate: function (username) {
+      return true; // placeholder isValidUsername
+    },
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    validate: function (mail) {
+      return true; // placeholder isValidEmail
+    },
   },
   password: {
     type: String,
+    //select: false, //TODO
     required: true,
-    unique: true,
+    validate: function (pass) {
+      return true; // placeholder isValidPassword
+    },
   },
-  // role of the user, used for rights management
-  role: {
-    type: String,
-    // role can only take the value "member" and "admin"
-    enum: ["member", "admin"],
-    // if not specified the role member is choosen
-    default: "member",
+  hobbies: [
+    // Implicitly defaults to empty array []
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tag",
+    },
+  ],
+  premium: {
+    type: Boolean,
+    default: false,
   },
 });
 
 UserSchema.set("versionKey", false);
 
-// Export the Movie model
 module.exports = mongoose.model("User", UserSchema);
