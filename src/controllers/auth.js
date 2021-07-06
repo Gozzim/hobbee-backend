@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 
 const config = require("../config");
 const UserModel = require("../models/user");
+const { isValidPassword } = require("../validators/auth");
 
 const login = async (req, res) => {
   // check if the body of the request contains all necessary properties
@@ -69,6 +70,22 @@ const register = async (req, res) => {
       message: "The request body must contain a username property",
     });
 
+  // Temporary Pass Handling
+  try {
+    const isPassValid = await isValidPassword(req.body.password);
+    if (!isPassValid) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid Password",
+      });
+    }
+  } catch (err) {
+    return res.status(422).json({
+      error: "Bad Request",
+      message: err.message,
+    });
+  }
+
   // handle the request
   try {
     // hash the password before storing it in the database
@@ -77,7 +94,7 @@ const register = async (req, res) => {
     // create a user object
     const user = {
       username: req.body.username,
-      email: req.body.email,
+      email: req.body.email.toLowerCase(),
       password: hashedPassword,
       hobbies: req.body.hobbies,
       premium: false,
