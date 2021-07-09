@@ -1,17 +1,19 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const { isValidEmail, isValidName } = require("../validators/auth");
+const { isValidEmail, isValidUsername } = require("../validators/auth");
 
 // Define the user schema
 const UserSchema = new mongoose.Schema({
-  username: { // TODO: check if username exists with lowerCase to avoid Testname and testname for example
+  username: {
+    // TODO: check if username exists with lowerCase to avoid Testname and testname for example
     type: String,
     unique: true,
     required: true,
-    validate: { // Temporary place
+    validate: {
+      // Temporary place
       isAsync: true,
-      validator: isValidName,
+      validator: isValidUsername,
       message: "Invalid Username",
     },
   },
@@ -19,7 +21,8 @@ const UserSchema = new mongoose.Schema({
     type: String,
     //unique: true,
     required: true,
-    validate: { // Temporary place
+    validate: {
+      // Temporary place
       isAsync: true,
       validator: isValidEmail,
       message: "Invalid Email",
@@ -29,6 +32,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     //select: false, //TODO
     required: true,
+  },
+  avatar: {
+    type: String,
+    default: "",
   },
   hobbies: [
     // Implicitly defaults to empty array []

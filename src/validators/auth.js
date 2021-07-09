@@ -11,12 +11,12 @@ async function isValidPassword(pass) {
   return pass && typeof pass === "string" && PASS_REGEX.test(pass);
 }
 
-async function isValidName(name) {
+async function isValidUsername(name) {
   return name && typeof name === "string" && USERNAME_REGEX.test(name);
 }
 
 module.exports = {
   isValidEmail,
   isValidPassword,
-  isValidName,
+  isValidUsername,
 };
