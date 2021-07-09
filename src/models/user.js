@@ -33,6 +33,10 @@ const UserSchema = new mongoose.Schema({
     //select: false, //TODO
     required: true,
   },
+  dateOfBirth: {
+    type: Date,
+    required: true,
+  },
   avatar: {
     type: String,
     default: "",
