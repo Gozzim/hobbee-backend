@@ -1,5 +1,7 @@
 const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
+const jwt = require("jsonwebtoken");
+const config = require("../config");
 
 const create = async (req, res) => {
   if (!Object.prototype.hasOwnProperty.call(req.body, "groupName"))
@@ -13,10 +15,10 @@ const create = async (req, res) => {
       error: "Bad Request",
       message: "The request body must contain a city property",
     });
-  if (!Object.prototype.hasOwnProperty.call(req.body, "how"))
+  if (!Object.prototype.hasOwnProperty.call(req.body, "onOffline"))
     return res.status(400).json({
       error: "Bad Request",
-      message: "The request body must contain a how property",
+      message: "The request body must contain a onOffline property",
     });
 
   if (
@@ -36,18 +38,20 @@ const create = async (req, res) => {
   try {
     const group = {
       groupName: req.body.groupName,
+      groupOwner: req.userId,
+      groupMembers: [req.userId],
       city: req.body.city,
-      how: req.body.how,
+      onOffline: req.body.onOffline,
       tags: req.body.tags,
       pic: req.body.pic,
       participants: req.body.participants || 0,
-      date: req.body.date,
+      date: req.body.date ? [req.body.date] : [],
       location: req.body.location,
       description: req.body.description,
     };
 
-    let retGroup = await GroupModel.create(group);
-    console.log(retGroup);
+    await GroupModel.create(group);
+    return res.status(200).json({});
   } catch (err) {
     console.log(err);
     return res.status(500).json({
@@ -85,9 +89,43 @@ const getGroups = async (req, res) => {
 
 const getGroup = async (req, res) => {
   const id = req.params.groupId;
+  let userId;
+
+  if (req.headers.authorization) {
+    let token = req.headers.authorization.split(" ")[1];
+    jwt.verify(token, config.JwtSecret, (err, decoded) => {
+      if (err) {
+        return res.status(401).send({
+          error: "Unauthorized",
+          message: "Failed to authenticate token.",
+        });
+      }
+      userId = decoded._id;
+    });
+  }
+
   try {
     const groups = await GroupModel.findOne({ _id: id }).exec();
-    return res.status(200).json(groups);
+    if (userId) {
+      const extendedGroup = await GroupModel.findOne({
+        _id: id,
+        groupMembers: userId,
+      }).exec();
+      if (extendedGroup) {
+        return res.status(200).json(groups);
+      }
+    }
+    const answer = {
+      _id: groups._id,
+      groupName: groups.groupName,
+      city: groups.city,
+      onOffline: groups.onOffline,
+      tags: groups.tags,
+      pic: groups.pic,
+      date: groups.date,
+      description: groups.description || null,
+    };
+    return res.status(200).json(answer);
   } catch (err) {
     console.log(err);
     return res.status(500).json({
