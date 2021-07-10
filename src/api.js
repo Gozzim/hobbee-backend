@@ -28,7 +28,6 @@ api.get("/api", (req, res) => {
 // API routes
 api.use("/api/auth", auth);
 api.use("/api/group", group);
-api.use("/api/auth", auth);
 api.use("/api/storage", storage);
 
 module.exports = api;

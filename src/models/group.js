@@ -1,7 +1,6 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const TagSchema = require("./tag");
 
 // Define the user schema
 const GroupSchema = new mongoose.Schema({
@@ -9,26 +8,44 @@ const GroupSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  groupOwner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  groupMembers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
   city: {
     type: String,
     required: true,
   },
-  how: {
+  onOffline: {
     type: String,
     required: true,
   },
-  tags: {
-    type: [mongoose.Schema.Types.ObjectId],
-  },
+  tags: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tag",
+      required: true,
+    },
+  ],
   pic: {
     type: String,
     //required: true,
   },
   participants: {
     type: Number,
+    default: 0,
   },
   date: {
-    type: Date,
+    type: [Date],
+    default: [],
   },
   location: {
     type: String,
