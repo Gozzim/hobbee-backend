@@ -18,7 +18,8 @@
     "start": "node ./index.js",
     "devstart": "nodemon ./index.js",
     "format": "prettier . --write",
-    "importtags": "node scripts/import.js"
+    "importtags": "node scripts/import.js",
+    "importgroups": "node scripts/importStandardGroups.js"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
