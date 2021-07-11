@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    //unique: true,
+    unique: true,
     required: true,
     validate: {
       // Temporary place
@@ -37,10 +37,7 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  avatar: {
-    type: String,
-    default: "",
-  },
+  avatar: String,
   hobbies: [
     // Implicitly defaults to empty array []
     {

@@ -94,8 +94,9 @@ const register = async (req, res) => {
     // create a user object
     const user = {
       username: req.body.username,
-      email: req.body.email.toLowerCase(),
+      email: req.body.email,
       password: hashedPassword,
+      dateOfBirth: req.body.dateOfBirth,
       hobbies: req.body.hobbies,
       premium: false,
     };
@@ -139,7 +140,7 @@ const register = async (req, res) => {
 const me = async (req, res) => {
   try {
     // get own user from database
-    let user = await UserModel.findById(req.userId).select("username premium").exec();
+    let user = await UserModel.findById(req.userId).select("username email dateOfBirth avatar hobbies premium").exec();
 
     if (!user)
       return res.status(404).json({
