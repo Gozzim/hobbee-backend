@@ -8,7 +8,7 @@ async function exec() {
   await mongoose.connect(config.mongoURI);
   for (let i = 0; i < hobbies.length; i++) {
     const tagInDB = await TagModel.findOne({ title: hobbies[i].title }).exec();
-    if (tagInDB === null) {
+    if (!tagInDB) {
       const tag = {
         title: hobbies[i].title,
         category: hobbies[i].category,

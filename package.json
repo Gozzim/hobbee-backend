@@ -19,7 +19,8 @@
     "devstart": "nodemon ./index.js",
     "format": "prettier . --write",
     "importexampleimages": "node scripts/import-example-images",
-    "importtags": "node scripts/import-tags"
+    "importtags": "node scripts/import-tags",
+    "importgroups": "node scripts/importStandardGroups.js"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
