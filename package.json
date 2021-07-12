@@ -18,9 +18,7 @@
     "start": "node ./index.js",
     "devstart": "nodemon ./index.js",
     "format": "prettier . --write",
-    "importexampleimages": "node scripts/import-example-images",
-    "importtags": "node scripts/import-tags",
-    "importgroups": "node scripts/importStandardGroups.js"
+    "import": "node scripts/import.js"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
@@ -28,6 +26,7 @@
     "express": "4.16.2",
     "express-fileupload": "^1.0.0",
     "helmet": "3.11.0",
+    "inquirer": "^8.1.1",
     "jsonwebtoken": "8.1.1",
     "mongoose": "^5.0.7"
   },
