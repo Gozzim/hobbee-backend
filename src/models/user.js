@@ -11,7 +11,6 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     required: true,
     validate: {
-      // Temporary place
       isAsync: true,
       validator: isValidUsername,
       message: "Invalid Username",
@@ -22,7 +21,6 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     required: true,
     validate: {
-      // Temporary place
       isAsync: true,
       validator: isValidEmail,
       message: "Invalid Email",
@@ -30,7 +28,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    //select: false, //TODO
+    select: false,
     required: true,
   },
   dateOfBirth: {

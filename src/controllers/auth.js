@@ -26,7 +26,7 @@ const login = async (req, res) => {
     // get the user form the database
     let user = await UserModel.findOne({
       username: req.body.username,
-    }).exec();
+    }).select("username password hasPremium").exec();
 
     // check if the password is valid
     const isPasswordValid = bcrypt.compareSync(
@@ -70,7 +70,7 @@ const register = async (req, res) => {
       message: "The request body must contain a username property",
     });
 
-  // Temporary Pass Handling
+  // Password validation before hashing
   try {
     const isPassValid = await isValidPassword(req.body.password);
     if (!isPassValid) {
@@ -123,7 +123,7 @@ const register = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    if (err.code == 11000) {
+    if (err.code === 11000) {
       return res.status(400).json({
         error: "User exists",
         message: err.message,
@@ -140,7 +140,7 @@ const register = async (req, res) => {
 const me = async (req, res) => {
   try {
     // get own user from database
-    let user = await UserModel.findById(req.userId).select("username email dateOfBirth avatar hobbies premium").exec();
+    let user = await UserModel.findById(req.userId).exec();
 
     if (!user)
       return res.status(404).json({
