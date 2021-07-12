@@ -1,9 +1,7 @@
 "use strict";
 
 const jwt = require("jsonwebtoken");
-
 const config = require("./config");
-
 const UserModel = require("./models/user");
 
 const allowCrossDomain = (req, res, next) => {
@@ -19,7 +17,34 @@ const allowCrossDomain = (req, res, next) => {
   }
 };
 
-const checkAuthentication = (req, res, next) => {
+const checkToken = async (req, res, next, token) => {
+  jwt.verify(token, config.JwtSecret, (err, decoded) => {
+    if (err)
+      return res.status(401).send({
+        error: "Unauthorized",
+        message: "Failed to authenticate token.",
+      });
+
+    // if everything is good, save to request for use in other routes
+    req.userId = decoded._id;
+    next();
+  });
+};
+
+const extractUserId = async (req, res, next) => {
+  let token = "";
+  if (req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  return await checkToken(req, res, next, token);
+};
+
+const checkAuthentication = async (req, res, next) => {
   // check header or url parameters or post parameters for token
   let token = "";
   if (req.headers.authorization) {
@@ -33,17 +58,7 @@ const checkAuthentication = (req, res, next) => {
     });
 
   // verifies secret and checks exp
-  jwt.verify(token, config.JwtSecret, (err, decoded) => {
-    if (err)
-      return res.status(401).send({
-        error: "Unauthorized",
-        message: "Failed to authenticate token.",
-      });
-
-    // if everything is good, save to request for use in other routes
-    req.userId = decoded._id;
-    next();
-  });
+  return await checkToken(req, res, next, token);
 };
 
 const checkIsAdmin = async (req, res, next) => {
@@ -63,15 +78,22 @@ const checkIsAdmin = async (req, res, next) => {
   }
 };
 
-const errorHandler = (err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-  res.status(500);
-  res.render("error", { error: err });
+const errorHandler = (req, res, requiredProps) => {
+  return requiredProps.reduce((err, item) => {
+    if (err) {
+      return err;
+    }
+    if (!Object.prototype.hasOwnProperty.call(req.body, item))
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "The request body must contain a " + item + " property",
+      });
+    return null;
+  }, null)
 };
 
 module.exports = {
+  extractUserId,
   allowCrossDomain,
   checkAuthentication,
   checkIsAdmin,
