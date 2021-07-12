@@ -13,7 +13,8 @@ const getUserNotifications = async (req, res) => {
       user: req.userId,
       date: { $gt: since },
     })
-      .select("_id group notificationType date read content")
+      .lean()
+      .populate("group", "groupName")
       .sort("date")
       .exec();
 
