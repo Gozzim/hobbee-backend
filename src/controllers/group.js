@@ -105,25 +105,25 @@ const getGroup = async (req, res) => {
   }
 
   try {
-    const groups = await GroupModel.findOne({ _id: id }).exec();
+    const group = await GroupModel.findOne({ _id: id }).exec();
     if (userId) {
       const extendedGroup = await GroupModel.findOne({
         _id: id,
         groupMembers: userId,
       }).exec();
       if (extendedGroup) {
-        return res.status(200).json(groups);
+        return res.status(200).json(group);
       }
     }
     const answer = {
-      _id: groups._id,
-      groupName: groups.groupName,
-      city: groups.city,
-      onOffline: groups.onOffline,
-      tags: groups.tags,
-      pic: groups.pic,
-      date: groups.date,
-      description: groups.description || null,
+      _id: group._id,
+      groupName: group.groupName,
+      city: group.city,
+      onOffline: group.onOffline,
+      tags: group.tags,
+      pic: group.pic,
+      date: group.date,
+      description: group.description || null,
     };
     return res.status(200).json(answer);
   } catch (err) {
