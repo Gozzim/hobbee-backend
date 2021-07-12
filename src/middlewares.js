@@ -78,12 +78,18 @@ const checkIsAdmin = async (req, res, next) => {
   }
 };
 
-const errorHandler = (err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-  res.status(500);
-  res.render("error", { error: err });
+const errorHandler = (req, res, requiredProps) => {
+  return requiredProps.reduce((err, item) => {
+    if (err) {
+      return err;
+    }
+    if (!Object.prototype.hasOwnProperty.call(req.body, item))
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "The request body must contain a " + item + " property",
+      });
+    return null;
+  }, null)
 };
 
 module.exports = {
