@@ -1,6 +1,7 @@
 "use strict";
 
 const express = require("express");
+const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 
@@ -14,7 +15,12 @@ const api = express();
 
 // Adding Basic Middlewares
 api.use(helmet());
-api.use(bodyParser.json());
+api.use(
+  fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+  })
+);
+api.use(bodyParser.json({ limit: "25mb" }));
 api.use(bodyParser.urlencoded({ extended: false }));
 api.use(middlewares.allowCrossDomain);
 
