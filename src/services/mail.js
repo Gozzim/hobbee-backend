@@ -28,9 +28,14 @@ async function sendMail(to, subject, content) {
   });
 }
 
-async function sendResetPassword(user, newPassword) {
-  const content ="Hi, " + user.username + " your new password is " + newPassword; // TODO Mail Template
-  await sendMail(user.email, "Your New Hobb.ee Password", content);
+async function sendResetPassword(user, link) {
+  const content ="Hi, " + user.username + " you can change your Password under " + link; // TODO Mail Template
+  await sendMail(user.email, "Change Hobb.ee Password", content);
+}
+
+async function sendConfirmChange(user) {
+  const content = "Hello " + user.username + ", your account information has successfully been changed."; // TODO Mail Template
+  await sendMail(user.email, "Your Hobb.ee Account", content);
 }
 
 async function sendAccountConfirmation(user) {
@@ -39,13 +44,14 @@ async function sendAccountConfirmation(user) {
 }
 
 async function sendFeedbackForm(user, feedback) {
-  const content = "Hello " + user.username + " and welcome to Hobb.ee!"; // TODO Mail Template
-  await sendMail(user.email, "Welcome to Hobb.ee!", content);
+  const content = "Hello " + user.username + ", please provide feedback about your experience under " + feedback; // TODO Mail Template
+  await sendMail(user.email, "How was your experience?", content);
 }
 
 module.exports = {
   sendMail,
   sendResetPassword,
+  sendConfirmChange,
   sendAccountConfirmation,
   sendFeedbackForm,
 };
