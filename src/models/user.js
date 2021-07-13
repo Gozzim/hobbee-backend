@@ -11,7 +11,6 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     required: true,
     validate: {
-      isAsync: true,
       validator: isValidUsername,
       message: "Invalid Username",
     },
@@ -21,7 +20,6 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     required: true,
     validate: {
-      isAsync: true,
       validator: isValidEmail,
       message: "Invalid Email",
     },
