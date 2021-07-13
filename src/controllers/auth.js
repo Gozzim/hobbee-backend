@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 
 const config = require("../config");
 const UserModel = require("../models/user");
+const { sendAccountConfirmation } = require("../services/mail");
 const { isValidPassword } = require("../validators/auth");
 
 const login = async (req, res) => {
@@ -117,7 +118,7 @@ const register = async (req, res) => {
         expiresIn: 86400, // expires in 24 hours
       }
     );
-
+    await sendAccountConfirmation(user);
     // return generated token
     res.status(200).json({
       token: token,
