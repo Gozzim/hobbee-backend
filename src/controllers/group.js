@@ -90,14 +90,10 @@ const getGroups = async (req, res) => {
 const getGroup = async (req, res) => {
   const id = req.params.groupId;
   let userId;
-  console.log("testytest");
-  console.log(req.headers);
 
   if (req.headers.authorization) {
-    console.log("testytest nach if");
     let token = req.headers.authorization.split(" ")[1];
     jwt.verify(token, config.JwtSecret, (err, decoded) => {
-      console.log(decoded);
       if (err) {
         return res.status(401).send({
           error: "Unauthorized",
@@ -105,33 +101,32 @@ const getGroup = async (req, res) => {
         });
       }
       userId = decoded._id;
-      console.log("userID: "+{userId});
     });
   }
 
   try {
-    const groups = await GroupModel.findOne({ _id: id }).populate({path: "groupMembers"}).populate({path: "groupOwner"}).exec();
+    const group = await GroupModel.findOne({ _id: id }).populate({path: "groupMembers"}).populate({path: "groupOwner"}).exec();
     if (userId) {
       const extendedGroup = await GroupModel.findOne({
         _id: id,
         groupMembers: userId,
       }).exec();
       if (extendedGroup) {
-        return res.status(200).json(groups);
+        return res.status(200).json(group);
       }
     }
     const answer = {
-      _id: groups._id,
-      groupName: groups.groupName,
-      groupOwner: groups.groupOwner,
-      groupMembers: groups.groupMembers,
-      city: groups.city,
-      onOffline: groups.onOffline,
-      tags: groups.tags,
-      participants: groups.participants,
-      pic: groups.pic,
-      date: groups.date,
-      description: groups.description || null,
+      _id: group._id,
+      groupName: group.groupName,
+      groupOwner: group.groupOwner,
+      groupMembers: group.groupMembers,
+      city: group.city,
+      onOffline: group.onOffline,
+      tags: group.tags,
+      participants: group.participants,
+      pic: group.pic,
+      date: group.date,
+      description: group.description || null,
     };
     return res.status(200).json(answer);
   } catch (err) {

@@ -1,29 +1,52 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const { isValidEmail, isValidUsername } = require("../validators/auth");
 
 // Define the user schema
 const UserSchema = new mongoose.Schema({
   username: {
+    // TODO: check if username exists with lowerCase to avoid Testname and testname for example
     type: String,
+    unique: true,
     required: true,
+    validate: {
+      validator: isValidUsername,
+      message: "Invalid Username",
+    },
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    validate: {
+      validator: isValidEmail,
+      message: "Invalid Email",
+    },
   },
   password: {
     type: String,
+    select: false,
     required: true,
-    unique: true,
   },
-  // role of the user, used for rights management
-  role: {
-    type: String,
-    // role can only take the value "member" and "admin"
-    enum: ["member", "admin"],
-    // if not specified the role member is choosen
-    default: "member",
+  dateOfBirth: {
+    type: Date,
+    required: true,
+  },
+  avatar: String,
+  hobbies: [
+    // Implicitly defaults to empty array []
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tag",
+    },
+  ],
+  premium: {
+    type: Boolean,
+    default: false,
   },
 });
 
 UserSchema.set("versionKey", false);
 
-// Export the Movie model
 module.exports = mongoose.model("User", UserSchema);

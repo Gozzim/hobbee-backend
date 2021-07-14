@@ -12,4 +12,12 @@ router.get(
   StorageController.getUserNotifications
 );
 
+router.post(
+  "/file/upload",
+  middlewares.checkAuthentication,
+  StorageController.uploadFile
+);
+
+router.get("/file/view/:fileId", StorageController.viewFile);
+
 module.exports = router;

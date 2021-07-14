@@ -1,21 +1,36 @@
-const config = require("../src/config");
-const mongoose = require("mongoose");
-const TagModel = require("../src/models/tag");
-const hobbies = require("../hobbies.json");
+const inquirer = require('inquirer');
+const { exec } = require('child_process');
 
-exec();
-async function exec() {
-  await mongoose.connect(config.mongoURI);
-  for (let i = 0; i < hobbies.length; i++) {
-    let tagInDB = await TagModel.findOne({ title: hobbies[i].title }).exec();
-    if (!tagInDB) {
-      const tag = {
-        title: hobbies[i].title,
-        category: hobbies[i].category,
-        subCategory: hobbies[i].subCategory,
-      };
-      await TagModel.create(tag);
+inquirer
+  .prompt([
+    {
+      type: 'rawlist',
+      name: 'importScript',
+      message: 'Please enter your choice:',
+      choices: [
+        { key: 0, value: "all" },
+        { key: 1, value: "tags" },
+        { key: 2, value: "groups" },
+        { key: 3, value: "example-images" }
+      ],
+    },
+  ])
+  .then(answer => {
+    switch (answer.importScript) {
+      case "all":
+        exec("node scripts/import-tags.js && node scripts/importStandardGroups.js && node scripts/import-example-images.js");
+        break;
+      case "tags":
+        exec("node scripts/import-tags.js");
+        break
+      case "groups":
+        exec("node scripts/importStandardGroups.js")
+        break;
+      case "example-images":
+        exec("node scripts/import-example-images.js")
+        break;
+      default:
+        console.log("Invalid Input")
+        break;
     }
-  }
-  mongoose.disconnect(config.mongoURI);
-}
+  });

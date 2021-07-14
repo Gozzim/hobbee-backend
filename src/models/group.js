@@ -36,8 +36,9 @@ const GroupSchema = new mongoose.Schema({
     },
   ],
   pic: {
-    type: String,
-    //required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "File",
+    required: true,
   },
   participants: {
     type: Number,
