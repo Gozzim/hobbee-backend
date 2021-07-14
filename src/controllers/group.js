@@ -90,10 +90,14 @@ const getGroups = async (req, res) => {
 const getGroup = async (req, res) => {
   const id = req.params.groupId;
   let userId;
+  console.log("testytest");
+  console.log(req.headers);
 
   if (req.headers.authorization) {
+    console.log("testytest nach if");
     let token = req.headers.authorization.split(" ")[1];
     jwt.verify(token, config.JwtSecret, (err, decoded) => {
+      console.log(decoded);
       if (err) {
         return res.status(401).send({
           error: "Unauthorized",
@@ -101,11 +105,12 @@ const getGroup = async (req, res) => {
         });
       }
       userId = decoded._id;
+      console.log("userID: "+{userId});
     });
   }
 
   try {
-    const groups = await GroupModel.findOne({ _id: id }).exec();
+    const groups = await GroupModel.findOne({ _id: id }).populate({path: "groupMembers"}).populate({path: "groupOwner"}).exec();
     if (userId) {
       const extendedGroup = await GroupModel.findOne({
         _id: id,
@@ -118,9 +123,12 @@ const getGroup = async (req, res) => {
     const answer = {
       _id: groups._id,
       groupName: groups.groupName,
+      groupOwner: groups.groupOwner,
+      groupMembers: groups.groupMembers,
       city: groups.city,
       onOffline: groups.onOffline,
       tags: groups.tags,
+      participants: groups.participants,
       pic: groups.pic,
       date: groups.date,
       description: groups.description || null,

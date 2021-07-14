@@ -10,5 +10,6 @@ router.post("/login", AuthController.login); // login
 router.post("/register", AuthController.register); // register a new user
 router.get("/me", middlewares.checkAuthentication, AuthController.me); // get own username, requires a logged in user
 router.post("/logout", middlewares.checkAuthentication, AuthController.logout); // logout user
+router.get("/:user", AuthController.getUsername);
 
 module.exports = router;
