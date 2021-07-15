@@ -138,9 +138,56 @@ const getGroup = async (req, res) => {
   }
 };
 
+const joinGroup = async (req, res) => {
+  console.log("starting join group");
+  //initialization
+  const id = req.params.groupId;
+  let userId;
+  //logged in?
+  if (req.headers.authorization) {
+    let token = req.headers.authorization.split(" ")[1];
+    jwt.verify(token, config.JwtSecret, (err, decoded) => {
+      if (err) {
+        return res.status(401).send({
+          error: "Unauthorized",
+          message: "Failed to authenticate token.",
+        });
+      }
+      userId = decoded._id;
+    });
+  }
+  try {
+    //get group
+    const group = await GroupModel.findOne({_id: id}).exec();
+    //is user in group?
+    if (userId) {
+      const extendedGroup = await GroupModel.findOne({
+        _id: id,
+        groupMembers: userId,
+      }).exec();
+      if (extendedGroup) {
+        console.log("here you are already in the group");
+        return res.status(200).json("already in group");
+      } else {
+        //is group full
+        console.log("here a group join happens");
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+  //is group full?
+  //put user into group
+}
+
 module.exports = {
   create,
   getTags,
   getGroups,
   getGroup,
+  joinGroup,
 };
