@@ -35,12 +35,22 @@ const login = async (req, res) => {
   }
 
   try {
-    // get the user form the database
-    let user = await UserModel.findOne({
-      username: req.body.username,
-    })
-      .select("username password hasPremium")
-      .exec();
+    // Check if user is logging in with Email or Username
+    const isEmail = await isValidEmail(req.body.username);
+    let user;
+    if (isEmail) {
+      user = await UserModel.findOne({
+        email: req.body.username,
+      })
+        .select("username password hasPremium")
+        .exec();
+    } else {
+      user = await UserModel.findOne({
+        username: req.body.username,
+      })
+        .select("username password hasPremium")
+        .exec();
+    }
 
     // check if the password is valid
     const isPasswordValid = bcrypt.compareSync(
