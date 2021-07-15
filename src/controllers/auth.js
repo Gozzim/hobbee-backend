@@ -256,6 +256,27 @@ const me = async (req, res) => {
   }
 };
 
+const isUsernameAvailable = async (req, res) => {
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["username"]);
+  if (error) {
+    return error;
+  }
+
+  try {
+    const user = await UserModel.findOne({ username: req.body.username }).exec();
+
+    return res.status(200).json({
+      isUsernameAvailable: !user,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 const logout = (req, res) => {
   res.status(200).send({ token: null });
 };
@@ -267,4 +288,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   me,
+  isUsernameAvailable,
 };
