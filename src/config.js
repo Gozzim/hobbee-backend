@@ -1,5 +1,9 @@
 "use strict";
 
+const dotenv = require ("dotenv");
+
+dotenv.config();
+
 // Configuration variables
 const port = process.env.PORT || "4000";
 const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/hobbee";

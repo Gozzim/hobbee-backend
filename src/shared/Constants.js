@@ -4,18 +4,24 @@ const PASS_REGEX = /^(?=.*[A-Z])(?=.*[a-z])((?=.*[^0-9a-zA-Z\s:])|(?=.*[0-9]))[\
 const USERNAME_REGEX = /^[A-Za-z0-9\-_]{4,16}$/; // prettier-ignore
 const GROUPNAME_REGEX = /^\S((?!(\s|_|-){2})[a-zA-Z0-9\-_\x20]){4,16}\S$/; // prettier-ignore
 
+const ERRORS = {
+  userNotFound: "User not found",
+  invalidLogin: "Invalid login",
+  invalidLoginBadUsername: "Incorrect Username",
+  invalidLoginBadPassword: "Incorrect Password",
+  invalidUsername: "Invalid Username",
+  invalidEmail: "Invalid Email",
+  invalidPassword: "Invalid Password",
+  invalidToken: "Failed to authenticate token",
+  invalidRecoveryToken: "Invalid or expired token",
+  userAlreadyExists: "User already exists",
+  usernameTaken: "Username is taken",
+};
+
 module.exports = {
   MAIL_REGEX,
   PASS_REGEX,
   USERNAME_REGEX,
   GROUPNAME_REGEX,
+  ERRORS,
 };
-
-/*
-// Regex for frontend Implementation
-export const PASS_REGEX = {
-    WEAK: /^(?=.*[A-Z])(?=.*[a-z])((?=.*[^0-9a-zA-Z\s:])|(?=.*[0-9]))[\S]{6,32}$/, // 6+ chars with lower- and upper-case chars and 1+ number or special char
-    MEDIUM: /^((?=.*[A-Z])(?=.*[a-z])((?=.*[^0-9a-zA-Z\s:])|(?=.*[0-9]))[\S]{10,32}|(?=.*[A-Z])(?=.*[a-z])(?=.*[^0-9a-zA-Z\s:])(?=.*[0-9])[\S]{8,32})$/, // 10+ chars with lower-, upper-case chars, 1+ number or special char Or 8+ chars with all 4 categories
-    STRONG: /^((?=.*[A-Z])(?=.*[a-z])(?=.*[^0-9a-zA-Z\s:])(?=.*[0-9])[\S]{10,32}|(?=.*[A-Z])(?=.*[a-z])((?=.*[^0-9a-zA-Z\s:])|(?=.*[0-9]))[\S]{15,32})$/, // 10+ chars with all 4 categories OR 15+ chars with lower- and upper-case chars and 1+ number or special char
-}
- */

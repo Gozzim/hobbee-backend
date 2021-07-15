@@ -1,6 +1,6 @@
 "use strict";
 
-const { MAIL_REGEX, USERNAME_REGEX, PASS_REGEX } = require("./regex_exp");
+const { MAIL_REGEX, USERNAME_REGEX, PASS_REGEX } = require("../shared/Constants");
 
 // Requires Email to be lower characters only.
 async function isValidEmail(email) {
