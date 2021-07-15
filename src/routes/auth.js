@@ -12,5 +12,6 @@ router.get("/me", middlewares.checkAuthentication, AuthController.me); // get ow
 router.post("/logout", middlewares.checkAuthentication, AuthController.logout); // logout user
 router.post("/forgot", AuthController.forgotPassword); // Send reset password link to user
 router.post("/reset", AuthController.resetPassword); // Change user password from reset link
+router.post("/exists/username", AuthController.isUsernameAvailable);
 
 module.exports = router;
