@@ -1,7 +1,9 @@
 "use strict";
 
 const datefns = require("date-fns");
+const mongoose = require("mongoose");
 
+const FileModel = require("../models/file");
 const NotificationModel = require("../models/notification");
 
 const getUserNotifications = async (req, res) => {
@@ -11,7 +13,8 @@ const getUserNotifications = async (req, res) => {
       user: req.userId,
       date: { $gt: since },
     })
-      .select("_id group notificationType date read content")
+      .lean()
+      .populate("group", "groupName")
       .sort("date")
       .exec();
 
@@ -24,6 +27,40 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
+const uploadFile = async (req, res) => {
+  try {
+    const file = await FileModel.create({
+      _id: new mongoose.Types.ObjectId().toString(),
+      mimeType: req.files.file.mimetype,
+      data: req.files.file.data,
+    });
+    return res.status(200).send({ id: file._id });
+  } catch (e) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: e.message,
+    });
+  }
+};
+
+const viewFile = async (req, res) => {
+  const id = req.params.fileId;
+
+  try {
+    const file = await FileModel.findById(id).exec();
+    res.set("Content-Type", file.mimeType);
+    res.set("Content-Disposition", "inline;");
+    return res.status(200).send(file.data);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getUserNotifications,
+  uploadFile,
+  viewFile,
 };

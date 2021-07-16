@@ -2,5 +2,8 @@
 /node_modules/*
 /npm-debug.log
 /config/config.js
+db/
+/.env
 
-.bak
+/test*/
+*.bak
