@@ -8,5 +8,6 @@ router.post("/create", middlewares.checkAuthentication, GroupController.create);
 router.get("/tags", GroupController.getTags);
 router.get("/groups", GroupController.getGroups);
 router.get("/group/:groupId", GroupController.getGroup);
+router.get("/mine", middlewares.checkAuthentication, GroupController.mine);
 
 module.exports = router;

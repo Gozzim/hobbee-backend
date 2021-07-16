@@ -1,7 +1,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const { isValidEmail, isValidUsername } = require("../validators/auth");
+const {isValidEmail, isValidUsername} = require("../validators/auth");
 
 // Define the user schema
 const UserSchema = new mongoose.Schema({
@@ -45,6 +45,13 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  groups: [
+    // Implicitly defaults to empty array []
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Group",
+    }
+  ]
 });
 
 UserSchema.set("versionKey", false);

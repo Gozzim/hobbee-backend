@@ -1,3 +1,6 @@
+const jwt = require("jsonwebtoken");
+
+const config = require("../config");
 const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 const UserModel = require("../models/user");
@@ -87,46 +90,43 @@ const getGroups = async (req, res) => {
 };
 
 const getGroup = async (req, res) => {
-  const id = req.params.groupId;
-  let userId;
-
-  if (req.headers.authorization) {
-    let token = req.headers.authorization.split(" ")[1];
-    jwt.verify(token, config.JwtSecret, (err, decoded) => {
-      if (err) {
-        return res.status(401).send({
-          error: "Unauthorized",
-          message: "Failed to authenticate token.",
-        });
-      }
-      userId = decoded._id;
-    });
-  }
+  const userId = req.userId;
 
   try {
-    const group = await GroupModel.findOne({ _id: id }).exec();
-    if (userId) {
-      const extendedGroup = await GroupModel.findOne({
-        _id: id,
-        groupMembers: userId,
-      }).exec();
-      if (extendedGroup) {
-        return res.status(200).json(group);
-      }
+    const group = await GroupModel.findById(req.params.groupId)
+      .lean()
+      .populate("groupMembers", "username")
+      .exec();
+
+    if (!group) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: `Group not found`,
+      });
     }
-    const answer = {
-      _id: group._id,
-      groupName: group.groupName,
-      city: group.city,
-      onOffline: group.onOffline,
-      tags: group.tags,
-      pic: group.pic,
-      date: group.date,
-      description: group.description || null,
-    };
-    return res.status(200).json(answer);
+
+    if (
+      !userId ||
+      !group.groupMembers.some((member) => member._id.equals(userId))
+    ) {
+      delete group.groupMembers;
+      delete group.location;
+    }
+
+    return res.status(200).json(group);
   } catch (err) {
-    console.log(err);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const mine = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId).select("groups").populate("group").exec();
+    return res.status(200).json(user.groups);
+  } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -139,4 +139,5 @@ module.exports = {
   getTags,
   getGroups,
   getGroup,
+  mine,
 };
