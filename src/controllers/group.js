@@ -1,7 +1,6 @@
 const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
-const jwt = require("jsonwebtoken");
-const config = require("../config");
+const UserModel = require("../models/user");
 
 const create = async (req, res) => {
   if (!Object.prototype.hasOwnProperty.call(req.body, "groupName"))
