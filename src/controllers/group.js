@@ -48,6 +48,7 @@ const create = async (req, res) => {
             date: req.body.date ? [req.body.date] : [],
             location: req.body.location,
             description: req.body.description,
+            chat: [],
         };
 
         await GroupModel.create(group);
@@ -177,6 +178,8 @@ const joinGroup = async (req, res) => {
                         message: "This group is full.",
                     });
                 }
+                //TODO: abide group limit
+
                 //put user into group
                 const updatedGroupMembers = group.groupMembers;
                 updatedGroupMembers.push(userId);

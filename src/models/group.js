@@ -54,6 +54,13 @@ const GroupSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  chat: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ChatMessage",
+      required: true,
+    },
+  ],
 });
 
 GroupSchema.set("versionKey", false);
