@@ -7,6 +7,8 @@ const crypto = require("crypto");
 const config = require("../config");
 const UserModel = require("../models/user");
 const ResetTokenModel = require("../models/resetToken");
+const { ERRORS } = require("../shared/Constants");
+const { isValidEmail } = require("../validators/auth");
 const { errorHandler } = require("../middlewares");
 const {
   sendResetPassword,
@@ -26,34 +28,38 @@ const generateToken = async (user) => {
 };
 
 const login = async (req, res) => {
-  // check if the body of the request contains all necessary properties
-  if (!Object.prototype.hasOwnProperty.call(req.body, "password"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a password property",
-    });
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["username", "password"]);
+  if (error) {
+    return error;
+  }
 
-  if (!Object.prototype.hasOwnProperty.call(req.body, "username"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a username property",
-    });
-
-  // handle the request
   try {
-    // get the user form the database
-    let user = await UserModel.findOne({
-      username: req.body.username,
-    })
-      .select("username password hasPremium")
-      .exec();
+    // Check if user is logging in with Email or Username
+    const isEmail = await isValidEmail(req.body.username);
+    let user;
+    if (isEmail) {
+      user = await UserModel.findOne({
+        email: req.body.username,
+      })
+        .select("username password hasPremium")
+        .exec();
+    } else {
+      user = await UserModel.findOne({
+        username: req.body.username,
+      })
+        .select("username password hasPremium")
+        .exec();
+    }
 
     // check if the password is valid
     const isPasswordValid = bcrypt.compareSync(
       req.body.password,
       user.password
     );
-    if (!isPasswordValid) return res.status(401).send({ token: null });
+    if (!isPasswordValid) {
+      return res.status(401).send({ token: null });
+    }
 
     const token = await generateToken(user);
 
@@ -62,25 +68,18 @@ const login = async (req, res) => {
     });
   } catch (err) {
     return res.status(404).json({
-      error: "User Not Found",
+      error: "Not Found",
       message: err.message,
     });
   }
 };
 
 const register = async (req, res) => {
-  // check if the body of the request contains all necessary properties
-  if (!Object.prototype.hasOwnProperty.call(req.body, "password"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a password property",
-    });
-
-  if (!Object.prototype.hasOwnProperty.call(req.body, "username"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a username property",
-    });
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["username", "email", "password", "dateOfBirth"]);
+  if (error) {
+    return error;
+  }
 
   try {
     // Password validation before hashing
@@ -88,9 +87,10 @@ const register = async (req, res) => {
     if (!isPassValid) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "Invalid Password",
+        message: ERRORS.invalidPassword,
       });
     }
+
     // hash the password before storing it in the database
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
 
@@ -107,18 +107,18 @@ const register = async (req, res) => {
     // create the user in the database
     let retUser = await UserModel.create(user);
 
+    // Send Email to user
+    await sendAccountConfirmation(user);
+
     // create a token
     const token = await generateToken(retUser);
-
-    await sendAccountConfirmation(user);
-    // return generated token
     res.status(200).json({
       token: token,
     });
   } catch (err) {
     if (err.code === 11000) {
       return res.status(400).json({
-        error: "User exists",
+        error: ERRORS.userAlreadyExists,
         message: err.message,
       });
     } else {
@@ -131,6 +131,7 @@ const register = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
+  // Check if body contains required properties
   const error = errorHandler(req, res, ["email"]);
   if (error) {
     return error;
@@ -141,7 +142,7 @@ const forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         error: "Not Found",
-        message: "User with given email does not exist",
+        message: "No user with this email found",
       });
     }
 
@@ -172,6 +173,7 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
+  // Check if body contains required properties
   const error = errorHandler(req, res, ["user", "token", "password"]);
   if (error) {
     return error;
@@ -182,7 +184,7 @@ const resetPassword = async (req, res) => {
     if (!resetToken) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "Invalid or expired token",
+        message: ERRORS.invalidRecoveryToken,
       });
     }
 
@@ -190,7 +192,7 @@ const resetPassword = async (req, res) => {
     if (!isValidToken) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "Invalid or expired token",
+        message: ERRORS.invalidRecoveryToken,
       });
     }
 
@@ -199,7 +201,7 @@ const resetPassword = async (req, res) => {
     if (!isPassValid) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "Invalid Password",
+        message: ERRORS.invalidPassword,
       });
     }
 
@@ -210,7 +212,7 @@ const resetPassword = async (req, res) => {
       // Should never happen
       return res.status(404).json({
         error: "Not Found",
-        message: "User does not exist",
+        message: ERRORS.userNotFound,
       });
     }
     user.password = hashedPassword;
@@ -238,11 +240,12 @@ const me = async (req, res) => {
     // get own user from database
     let user = await UserModel.findById(req.userId).exec();
 
-    if (!user)
+    if (!user) {
       return res.status(404).json({
         error: "Not Found",
-        message: `User not found`,
+        message: ERRORS.userNotFound,
       });
+    }
 
     return res.status(200).json(user);
   } catch (err) {
@@ -253,17 +256,19 @@ const me = async (req, res) => {
   }
 };
 
-const getUsername = async (req, res) => {
+const isUsernameAvailable = async (req, res) => {
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["username"]);
+  if (error) {
+    return error;
+  }
+
   try {
-    let user = await UserModel.findById(req.params.userId).select("username").exec();
+    const user = await UserModel.findOne({ username: req.body.username }).exec();
 
-    if (!user)
-      return res.status(404).json({
-        error: "Not Found",
-        message: `User not found`,
-      });
-
-    return res.status(200).json(user);
+    return res.status(200).json({
+      isUsernameAvailable: !user,
+    });
   } catch (err) {
     return res.status(500).json({
       error: "Internal Server Error",
@@ -283,5 +288,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   me,
-  getUsername,
+  isUsernameAvailable,
 };
