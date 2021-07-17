@@ -52,8 +52,8 @@ const create = async (req, res) => {
       description: req.body.description,
     };
 
-    await GroupModel.create(group);
-    return res.status(200).json({});
+    const groupDB = await GroupModel.create(group);
+    return res.status(200).json({ id: groupDB._id });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
@@ -104,7 +104,7 @@ const getGroup = async (req, res) => {
         message: `Group not found`,
       });
     }
-
+    console.log(userId, group.groupMembers);
     if (
       !userId ||
       !group.groupMembers.some((member) => member._id.equals(userId))
@@ -124,7 +124,10 @@ const getGroup = async (req, res) => {
 
 const mine = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId).select("groups").populate("group").exec();
+    const user = await UserModel.findById(req.userId)
+      .select("groups")
+      .populate("group")
+      .exec();
     return res.status(200).json(user.groups);
   } catch (err) {
     return res.status(500).json({
