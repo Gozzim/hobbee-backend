@@ -34,7 +34,7 @@ const uploadFile = async (req, res) => {
       mimeType: req.files.file.mimetype,
       data: req.files.file.data,
     });
-    return res.status(200).send({ id: file._id });
+    return res.status(200).json({ id: file._id });
   } catch (e) {
     return res.status(500).json({
       error: "Internal Server Error",

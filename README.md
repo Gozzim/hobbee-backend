@@ -6,3 +6,4 @@ This is the backend repo.
 - start server: `npm run devstart`
 - import tags: `npm run importtags`
 - import standard groups: `npm run importgroups`
+- import example images: `npm run importexampleimages`
