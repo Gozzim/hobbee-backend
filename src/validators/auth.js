@@ -3,8 +3,7 @@
 const { MAIL_REGEX, USERNAME_REGEX, PASS_REGEX } = require("../shared/Constants");
 
 async function isValidEmail(email) {
-  const exists = await UserModel.findOne({ email: email }).collation({locale: 'en', strength: 2})
-  return email && typeof email === "string" && !exists && MAIL_REGEX.test(email.toLowerCase());
+  return email && typeof email === "string" && MAIL_REGEX.test(email.toLowerCase());
 }
 
 async function isValidPassword(pass) {
