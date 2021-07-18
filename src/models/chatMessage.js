@@ -1,7 +1,6 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const { isValidEmail, isValidUsername } = require("../validators/auth");
 
 // Define the user schema
 const ChatMessageSchema = new mongoose.Schema({
@@ -14,7 +13,7 @@ const ChatMessageSchema = new mongoose.Schema({
         required: true,
     },
     timestamp: {
-        type: [Date],
+        type: Date,
     },
     isSystemMessage: {
         type: Boolean,
