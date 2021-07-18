@@ -1,12 +1,11 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const { isValidEmail, isValidUsername } = require("../validators/auth");
+const { isValidEmail, isValidUsername, isValidDateOfBirth } = require("../validators/auth");
 
 // Define the user schema
 const UserSchema = new mongoose.Schema({
   username: {
-    // TODO: check if username exists with lowerCase to avoid Testname and testname for example
     type: String,
     unique: true,
     required: true,
@@ -32,6 +31,10 @@ const UserSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
     required: true,
+    validate: {
+      validator: isValidDateOfBirth,
+      message: "Invalid date of birth"
+    },
   },
   avatar: String,
   hobbies: [

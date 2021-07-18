@@ -6,14 +6,13 @@ const GROUPNAME_REGEX = /^\S((?!(\s|_|-){2})[a-zA-Z0-9\-_\x20]){4,16}\S$/; // pr
 
 const ERRORS = {
   userNotFound: "User not found",
-  invalidLogin: "Invalid login",
-  invalidLoginBadUsername: "Incorrect Username",
-  invalidLoginBadPassword: "Incorrect Password",
+  invalidCredentials: "Invalid credentials",
   invalidUsername: "Invalid Username",
   invalidEmail: "Invalid Email",
   invalidPassword: "Invalid Password",
   invalidToken: "Failed to authenticate token",
-  invalidRecoveryToken: "Invalid or expired token",
+  expiredToken: "Expired token",
+  invalidRecoveryToken: "Invalid or expired recovery token",
   userAlreadyExists: "User already exists",
   usernameTaken: "Username is taken",
 };

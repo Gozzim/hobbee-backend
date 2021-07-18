@@ -32,13 +32,15 @@ const login = async (req, res) => {
     if (isEmail) {
       user = await UserModel.findOne({
         email: req.body.username,
-      })
-        .select("username password premium.active premium.subscription.expiration premium.subscription.id");
+      }).select(
+        "username password premium.active premium.subscription.expiration premium.subscription.id"
+      );
     } else {
       user = await UserModel.findOne({
         username: req.body.username,
-      })
-        .select("username password premium.active premium.subscription.expiration premium.subscription.id");
+      }).select(
+        "username password premium.active premium.subscription.expiration premium.subscription.id"
+      );
     }
     //console.log(user);
 
@@ -53,7 +55,9 @@ const login = async (req, res) => {
 
     // check if premium has expired
     if (user.premium.active) {
-      const premiumExpiration = Date.parse(user.premium.subscription.expiration);
+      const premiumExpiration = Date.parse(
+        user.premium.subscription.expiration
+      );
       if (Date.now() > premiumExpiration) {
         user.premium = await renewSubscription(user.premium.subscription.id);
         await user.save();
@@ -75,18 +79,35 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   // Check if body contains required properties
-  const error = errorHandler(req, res, ["username", "email", "password", "dateOfBirth"]);
+  const error = errorHandler(req, res, [
+    "username",
+    "email",
+    "password",
+    "dateOfBirth",
+  ]);
   if (error) {
     return error;
   }
 
   try {
+    // Check case insensitive username and email
+    const usernameExists = await UserModel.findOne({
+      username: req.body.username,
+    }).collation({
+      locale: "en",
+      strength: 2,
+    });
+    const emailExists = await UserModel.findOne({
+      email: req.body.email,
+    }).collation({ locale: "en", strength: 2 });
+
     // Password validation before hashing
     const isPassValid = await isValidPassword(req.body.password);
-    if (!isPassValid) {
+
+    if (!isPassValid || usernameExists || emailExists) {
       return res.status(400).json({
         error: "Bad Request",
-        message: ERRORS.invalidPassword,
+        message: ERRORS.invalidCredentials,
       });
     }
 
@@ -137,30 +158,26 @@ const forgotPassword = async (req, res) => {
 
   try {
     const user = await UserModel.findOne({ email: req.body.email }).exec();
-    if (!user) {
-      return res.status(404).json({
-        error: "Not Found",
-        message: "No user with this email found",
-      });
+
+    if (user) {
+      let token = await ResetTokenModel.findOne({ user: user._id });
+      if (token) {
+        await token.delete();
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      // Hashing Token. Saving plain token is comparable to saving plain passwords
+      const tokenHash = await bcrypt.hash(resetToken, 8);
+      const newToken = {
+        user: user._id,
+        token: tokenHash,
+      };
+      await ResetTokenModel.create(newToken);
+
+      // Generate link with userId and token for validation while resetting the password
+      const link = `${config.frontendDomain}/password-reset/${user._id}/${resetToken}`;
+      await sendResetPassword(user, link);
     }
-
-    let token = await ResetTokenModel.findOne({ user: user._id });
-    if (token) {
-      await token.delete();
-    }
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    // Hashing Token. Saving plain token is comparable to saving plain passwords
-    const tokenHash = await bcrypt.hash(resetToken, 8);
-    const newToken = {
-      user: user._id,
-      token: tokenHash,
-    };
-    await ResetTokenModel.create(newToken);
-
-    // Generate link with userId and token for validation while resetting the password
-    const link = `${config.frontendDomain}/password-reset/${user._id}/${resetToken}`;
-    await sendResetPassword(user, link);
 
     return res.status(200).send({});
   } catch (err) {
@@ -205,7 +222,9 @@ const resetPassword = async (req, res) => {
 
     // hash the password before storing it in the database
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
-    const user = await UserModel.findById(req.body.user).select("username premium.active premium.subscription.expiration premium.subscription.id");
+    const user = await UserModel.findById(req.body.user).select(
+      "username premium.active premium.subscription.expiration premium.subscription.id"
+    );
     if (!user) {
       // Should never happen
       return res.status(404).json({
@@ -222,7 +241,9 @@ const resetPassword = async (req, res) => {
 
     // Check premium status to prevent abuse
     if (user.premium.active) {
-      const premiumExpiration = Date.parse(user.premium.subscription.expiration);
+      const premiumExpiration = Date.parse(
+        user.premium.subscription.expiration
+      );
       if (Date.now() > premiumExpiration) {
         user.premium = await renewSubscription(user.premium.subscription.id);
         await user.save();
@@ -270,7 +291,10 @@ const isUsernameAvailable = async (req, res) => {
   }
 
   try {
-    const user = await UserModel.findOne({ username: req.body.username }).exec();
+    // Find user with requested username, ignoring case sensitivity
+    const user = await UserModel.findOne({
+      username: req.body.username,
+    }).collation({ locale: "en", strength: 2 });
 
     return res.status(200).json({
       isUsernameAvailable: !user,
