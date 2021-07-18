@@ -13,6 +13,18 @@ router.get(
 );
 
 router.post(
+  "/notifications/read/:notification",
+  middlewares.checkAuthentication,
+  StorageController.setNotificationRead
+);
+
+router.post(
+  "/notifications/clear",
+  middlewares.checkAuthentication,
+  StorageController.clearNotifications
+);
+
+router.post(
   "/file/upload",
   middlewares.checkAuthentication,
   StorageController.uploadFile
