@@ -47,9 +47,13 @@ async function processChatData(chat) {
 
 // Emitters
 const emitSystemMessage = async (data) => {
-  const newChat = await processChatData(data);
-  io.emit("return message", newChat);
-  io.broadcast.emit("return message", newChat);
+  try {
+    const newChat = await processChatData(data);
+    io.emit("return message", newChat);
+    io.broadcast.emit("return message", newChat);
+  } catch (e) {
+    console.log(e.message)
+  }
 };
 
 const socketConnection = async (server) => {

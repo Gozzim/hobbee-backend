@@ -7,7 +7,7 @@ const middlewares = require("../middlewares");
 router.post("/create", middlewares.checkAuthentication, GroupController.create);
 router.get("/tags", GroupController.getTags);
 router.get("/groups", GroupController.getGroups);
-router.get("/group/:groupId", GroupController.getGroup);
+router.get("/group/:groupId", middlewares.extractUserId, GroupController.getGroup);
 router.get("/mine", middlewares.checkAuthentication, GroupController.mine);
 router.post("/join-group/:groupId", middlewares.checkAuthentication, GroupController.joinGroup);
 router.post("/leave-group/:groupId", middlewares.checkAuthentication, GroupController.leaveGroup);
