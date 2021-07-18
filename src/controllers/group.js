@@ -1,9 +1,5 @@
-const jwt = require("jsonwebtoken");
-
-const config = require("../config");
 const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
-const UserModel = require("../models/user");
 const ChatMessageModel = require("../models/chatMessage");
 const UserModel = require("../models/user");
 const { emitSystemMessage } = require("../services/socket");
@@ -177,7 +173,7 @@ const joinGroup = async (req, res) => {
     const groupsWithUser = await GroupModel.find({ groupMembers: userId })
       .countDocuments()
       .exec();
-    if (!user.premium && groupsWithUser >= 5) {
+    if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
         message: "You can't join any more groups",
