@@ -25,8 +25,16 @@ const checkToken = async (req, res, next, token) => {
         message: "Failed to authenticate token.",
       });
 
+    if (Date.now() > decoded.exp * 1000) {
+      return res.status(401).send({
+        error: "Unauthorized",
+        message: "Token expired",
+      });
+    }
+
     // if everything is good, save to request for use in other routes
     req.userId = decoded._id;
+    req.hasPremium = decoded.hasPremium;
     next();
   });
 };
