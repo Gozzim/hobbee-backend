@@ -4,6 +4,7 @@ const express = require("express");
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
+const cors = require('cors');
 
 const middlewares = require("./middlewares");
 
@@ -24,6 +25,7 @@ api.use(
 api.use(bodyParser.json({ limit: "25mb" }));
 api.use(bodyParser.urlencoded({ extended: false }));
 api.use(middlewares.allowCrossDomain);
+api.use(cors());
 
 // Basic route
 api.get("/api", (req, res) => {
