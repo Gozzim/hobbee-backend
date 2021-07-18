@@ -10,6 +10,7 @@ const middlewares = require("./middlewares");
 const auth = require("./routes/auth");
 const group = require("./routes/group");
 const storage = require("./routes/storage");
+const payment = require("./routes/payment");
 
 const api = express();
 
@@ -35,5 +36,6 @@ api.get("/api", (req, res) => {
 api.use("/api/auth", auth);
 api.use("/api/group", group);
 api.use("/api/storage", storage);
+api.use("/api/payment", payment);
 
 module.exports = api;

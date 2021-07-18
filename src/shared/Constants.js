@@ -6,16 +6,21 @@ const GROUPNAME_REGEX = /^\S((?!(\s|_|-){2})[a-zA-Z0-9\-_\x20]){4,16}\S$/; // pr
 
 const ERRORS = {
   userNotFound: "User not found",
-  invalidLogin: "Invalid login",
-  invalidLoginBadUsername: "Incorrect Username",
-  invalidLoginBadPassword: "Incorrect Password",
+  invalidCredentials: "Invalid credentials",
   invalidUsername: "Invalid Username",
   invalidEmail: "Invalid Email",
   invalidPassword: "Invalid Password",
   invalidToken: "Failed to authenticate token",
-  invalidRecoveryToken: "Invalid or expired token",
+  expiredToken: "Expired token",
+  invalidRecoveryToken: "Invalid or expired recovery token",
   userAlreadyExists: "User already exists",
   usernameTaken: "Username is taken",
+};
+
+const SUBSCRIPTION_PLAN = {
+  elite: "P-62E82252FP3121819MDZR2EY",
+  advanced: "P-6RW02432GE006263HMDZRZZY",
+  standard: "P-0MA943175X946230LMDZRZSQ",
 };
 
 module.exports = {
@@ -24,4 +29,5 @@ module.exports = {
   USERNAME_REGEX,
   GROUPNAME_REGEX,
   ERRORS,
+  SUBSCRIPTION_PLAN,
 };
