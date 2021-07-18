@@ -1,8 +1,28 @@
 const { ERRORS } = require("../shared/Constants");
-const { getPayPalSubscription } = require("../services/payment");
+const {
+  payPalSubscriptionRequest,
+  cancelPayPalSubscriptionRequest,
+} = require("../services/payment");
 const UserModel = require("../models/user");
 const { generateToken } = require("../shared/helpers");
 const { errorHandler } = require("../middlewares");
+
+const renewSubscription = async (subscriptionId) => {
+  const subscription = await payPalSubscriptionRequest(subscriptionId);
+
+  if (!subscription || subscription.status !== "ACTIVE") {
+    return { active: false };
+  }
+
+  return {
+    active: true,
+    subscription: {
+      id: subscription.id,
+      plan: subscription.plan_id,
+      expiration: subscription.billing_info.next_billing_time,
+    },
+  };
+};
 
 const handlePremiumRequest = async (req, res) => {
   // Check if body contains required properties
@@ -12,7 +32,7 @@ const handlePremiumRequest = async (req, res) => {
   }
 
   // TODO: What about outstanding_balance?
-  const subscription = await getPayPalSubscription(req.body.subscriptionID);
+  const subscription = await payPalSubscriptionRequest(req.body.subscriptionID);
 
   if (!subscription || subscription.status !== "ACTIVE") {
     return res.status(400).json({
@@ -52,24 +72,42 @@ const handlePremiumRequest = async (req, res) => {
   }
 };
 
-const renewSubscription = async (subscriptionId) => {
-  const subscription = await getPayPalSubscription(subscriptionId);
+const cancelSubscription = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId).select(
+      "premium.active premium.subscription.id"
+    );
+    if (!user) {
+      // Should never happen
+      return res.status(404).json({
+        error: "Not Found",
+        message: ERRORS.userNotFound,
+      });
+    }
 
-  if (!subscription || subscription.status !== "ACTIVE") {
-    return { active: false };
+    if (user.premium.active) {
+      const cancelReq = await cancelPayPalSubscriptionRequest(user.premium.subscription.id);
+
+      // If cancel was successful
+      if (cancelReq.status === 204) {
+        return res.status(200).json();
+      }
+    }
+
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "Subscription could not be canceled",
+    });
+  } catch (e) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: e.message,
+    });
   }
-
-  return {
-    active: true,
-    subscription: {
-      id: subscription.id,
-      plan: subscription.plan_id,
-      expiration: subscription.billing_info.next_billing_time,
-    },
-  };
 };
 
 module.exports = {
-  handlePremiumRequest,
   renewSubscription,
+  handlePremiumRequest,
+  cancelSubscription,
 };

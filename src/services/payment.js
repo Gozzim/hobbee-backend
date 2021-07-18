@@ -7,7 +7,7 @@ const config = require("../config");
 
 let token = null;
 
-const getPayPalAccessToken = async () => {
+const payPalAccessTokenRequest = async () => {
   const reqConfig = {
     headers: {
       Accept: "application/json",
@@ -29,8 +29,8 @@ const getPayPalAccessToken = async () => {
   }
 };
 
-const getPayPalSubscription = async (subscriptionId) => {
-  await getPayPalAccessToken();
+const payPalSubscriptionRequest = async (subscriptionId) => {
+  await payPalAccessTokenRequest();
 
   const reqConfig = {
     headers: {
@@ -51,7 +51,31 @@ const getPayPalSubscription = async (subscriptionId) => {
   }
 };
 
+const cancelPayPalSubscriptionRequest = async (subscriptionId) => {
+  await payPalAccessTokenRequest();
+
+  const reqConfig = {
+    headers: {
+      Authorization: "Bearer " + token,
+      Accept: "application/json",
+    },
+  };
+
+  try {
+    const resp = await axios.post(
+      "billing/subscriptions/" + subscriptionId + "/cancel",
+      { reason: "User canceled subscription" },
+      reqConfig
+    );
+
+    return resp;
+  } catch (e) {
+    console.log(e.response.data)
+    return e.message;
+  }
+};
+
 module.exports = {
-  getPayPalAccessToken,
-  getPayPalSubscription,
+  payPalSubscriptionRequest,
+  cancelPayPalSubscriptionRequest,
 };
