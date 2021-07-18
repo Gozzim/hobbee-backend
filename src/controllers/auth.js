@@ -19,7 +19,7 @@ const { isValidPassword } = require("../validators/auth");
 
 const generateToken = async (user) => {
   return jwt.sign(
-    { _id: user._id, username: user.username, hasPremium: user.premium },
+    { _id: user._id, username: user.username, hasPremium: user.premium.active },
     config.JwtSecret,
     {
       expiresIn: 86400,
@@ -42,15 +42,16 @@ const login = async (req, res) => {
       user = await UserModel.findOne({
         email: req.body.username,
       })
-        .select("username password hasPremium")
+        .select("username password premium.active")
         .exec();
     } else {
       user = await UserModel.findOne({
         username: req.body.username,
       })
-        .select("username password hasPremium")
+        .select("username password premium.active")
         .exec();
     }
+    console.log(user);
 
     // check if the password is valid
     const isPasswordValid = bcrypt.compareSync(
@@ -282,6 +283,7 @@ const logout = (req, res) => {
 };
 
 module.exports = {
+  generateToken,
   login,
   register,
   logout,

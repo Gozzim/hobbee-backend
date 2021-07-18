@@ -18,10 +18,17 @@ const ERRORS = {
   usernameTaken: "Username is taken",
 };
 
+const SUBSCRIPTION_PLAN = {
+  elite: "P-62E82252FP3121819MDZR2EY",
+  advanced: "P-6RW02432GE006263HMDZRZZY",
+  standard: "P-0MA943175X946230LMDZRZSQ",
+};
+
 module.exports = {
   MAIL_REGEX,
   PASS_REGEX,
   USERNAME_REGEX,
   GROUPNAME_REGEX,
   ERRORS,
+  SUBSCRIPTION_PLAN,
 };
