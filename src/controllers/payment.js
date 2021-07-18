@@ -1,8 +1,8 @@
 const { ERRORS } = require("../shared/Constants");
 const { getPayPalSubscription } = require("../services/payment");
 const UserModel = require("../models/user");
+const { generateToken } = require("../shared/helpers");
 const { errorHandler } = require("../middlewares");
-const { generateToken } = require("./auth");
 
 const handlePremiumRequest = async (req, res) => {
   // Check if body contains required properties
@@ -12,9 +12,9 @@ const handlePremiumRequest = async (req, res) => {
   }
 
   // TODO: What about outstanding_balance?
-  const order = await getPayPalSubscription(req.body.subscriptionID);
+  const subscription = await getPayPalSubscription(req.body.subscriptionID);
 
-  if (!order) {
+  if (!subscription || subscription.status !== "ACTIVE") {
     return res.status(400).json({
       error: "Bad Request",
       message: "The subscription is not active",
@@ -36,11 +36,9 @@ const handlePremiumRequest = async (req, res) => {
       console.log("Already has premium");
     }
 
-    console.log(order);
-
-    user.premium.subscription.id = order.id;
-    user.premium.subscription.plan = order.plan_id;
-    user.premium.subscription.expiration = order.billing_info.next_billing_time;
+    user.premium.subscription.id = subscription.id;
+    user.premium.subscription.plan = subscription.plan_id;
+    user.premium.subscription.expiration = subscription.billing_info.next_billing_time;
     user.premium.active = true;
     await user.save();
 
@@ -54,7 +52,24 @@ const handlePremiumRequest = async (req, res) => {
   }
 };
 
+const renewSubscription = async (subscriptionId) => {
+  const subscription = await getPayPalSubscription(subscriptionId);
+
+  if (!subscription || subscription.status !== "ACTIVE") {
+    return { active: false };
+  }
+
+  return {
+    active: true,
+    subscription: {
+      id: subscription.id,
+      plan: subscription.plan_id,
+      expiration: subscription.billing_info.next_billing_time,
+    },
+  };
+};
 
 module.exports = {
   handlePremiumRequest,
+  renewSubscription,
 };

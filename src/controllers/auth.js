@@ -1,12 +1,13 @@
 "use strict";
 
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
 const config = require("../config");
 const UserModel = require("../models/user");
 const ResetTokenModel = require("../models/resetToken");
+const { generateToken } = require("../shared/helpers");
+const { renewSubscription } = require("./payment");
 const { ERRORS } = require("../shared/Constants");
 const { isValidEmail } = require("../validators/auth");
 const { errorHandler } = require("../middlewares");
@@ -16,16 +17,6 @@ const {
   sendAccountConfirmation,
 } = require("../services/mail");
 const { isValidPassword } = require("../validators/auth");
-
-const generateToken = async (user) => {
-  return jwt.sign(
-    { _id: user._id, username: user.username, hasPremium: user.premium.active },
-    config.JwtSecret,
-    {
-      expiresIn: 86400,
-    }
-  );
-};
 
 const login = async (req, res) => {
   // Check if body contains required properties
@@ -42,16 +33,14 @@ const login = async (req, res) => {
       user = await UserModel.findOne({
         email: req.body.username,
       })
-        .select("username password premium.active")
-        .exec();
+        .select("username password premium.active premium.subscription.expiration");
     } else {
       user = await UserModel.findOne({
         username: req.body.username,
       })
-        .select("username password premium.active")
-        .exec();
+        .select("username password premium.active premium.subscription.expiration");
     }
-    console.log(user);
+    //console.log(user);
 
     // check if the password is valid
     const isPasswordValid = bcrypt.compareSync(
@@ -60,6 +49,16 @@ const login = async (req, res) => {
     );
     if (!isPasswordValid) {
       return res.status(401).send({ token: null });
+    }
+
+    // check if premium has expired
+    if (user.premium.active) {
+      const premiumExpiration = Date.parse(user.premium.subscription.expiration);
+      if (Date.now() > premiumExpiration) {
+        user.premium = await renewSubscription(user.premium.subscription.id);
+        await user.save();
+        //console.log(user);
+      }
     }
 
     const token = await generateToken(user);
@@ -102,7 +101,6 @@ const register = async (req, res) => {
       password: hashedPassword,
       dateOfBirth: req.body.dateOfBirth,
       hobbies: req.body.hobbies,
-      premium: false,
     };
 
     // create the user in the database
@@ -208,7 +206,7 @@ const resetPassword = async (req, res) => {
 
     // hash the password before storing it in the database
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
-    const user = await UserModel.findById(req.body.user);
+    const user = await UserModel.findById(req.body.user).select("username premium.active premium.subscription.expiration premium.subscription.id");
     if (!user) {
       // Should never happen
       return res.status(404).json({
@@ -223,13 +221,21 @@ const resetPassword = async (req, res) => {
     await resetToken.delete();
     await sendConfirmChange(user);
 
+    // Check premium status to prevent abuse
+    if (user.premium.active) {
+      const premiumExpiration = Date.parse(user.premium.subscription.expiration);
+      if (Date.now() > premiumExpiration) {
+        user.premium = await renewSubscription(user.premium.subscription.id);
+        await user.save();
+      }
+    }
+
     // Generate JWT token to log user in again right away
     const token = await generateToken(user);
     res.status(200).json({
       token: token,
     });
   } catch (err) {
-    console.log(err.message);
     return res.status(500).json({
       error: "Internal server error",
     });
@@ -283,7 +289,6 @@ const logout = (req, res) => {
 };
 
 module.exports = {
-  generateToken,
   login,
   register,
   logout,

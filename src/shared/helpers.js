@@ -1,3 +1,6 @@
+const jwt = require("jsonwebtoken");
+
+const config = require("../config");
 const { SUBSCRIPTION_PLAN } = require("./Constants");
 
 const getPlanIdFromRequest = async (planId) => {
@@ -13,6 +16,17 @@ const getPlanIdFromRequest = async (planId) => {
   }
 };
 
+const generateToken = async (user) => {
+  return jwt.sign(
+    { _id: user._id, username: user.username, hasPremium: user.premium.active },
+    config.JwtSecret,
+    {
+      expiresIn: 24 * 60 * 60,
+    }
+  );
+};
+
 module.exports = {
   getPlanIdFromRequest,
+  generateToken,
 };

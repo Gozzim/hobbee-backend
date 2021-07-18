@@ -24,7 +24,6 @@ const getPayPalAccessToken = async () => {
       reqConfig
     );
     token = resp.data.access_token;
-    console.log(token);
   } catch (e) {
     console.log(e.message);
   }
