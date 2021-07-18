@@ -50,6 +50,7 @@ const UserSchema = new mongoose.Schema({
       id: {
         type: String,
         unique: true,
+        sparse: true,
         select: false,
       },
       plan: {

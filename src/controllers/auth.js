@@ -33,12 +33,12 @@ const login = async (req, res) => {
       user = await UserModel.findOne({
         email: req.body.username,
       })
-        .select("username password premium.active premium.subscription.expiration");
+        .select("username password premium.active premium.subscription.expiration premium.subscription.id");
     } else {
       user = await UserModel.findOne({
         username: req.body.username,
       })
-        .select("username password premium.active premium.subscription.expiration");
+        .select("username password premium.active premium.subscription.expiration premium.subscription.id");
     }
     //console.log(user);
 
@@ -57,7 +57,6 @@ const login = async (req, res) => {
       if (Date.now() > premiumExpiration) {
         user.premium = await renewSubscription(user.premium.subscription.id);
         await user.save();
-        //console.log(user);
       }
     }
 
