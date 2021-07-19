@@ -2,7 +2,6 @@ const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 const ChatMessageModel = require("../models/chatMessage");
 const UserModel = require("../models/user");
-const { emitSystemMessage } = require("../services/socket");
 const { processChatData } = require("../services/socket");
 
 const create = async (req, res) => {
@@ -200,7 +199,6 @@ const joinGroup = async (req, res) => {
         chat: newChat,
       }
     );
-    emitSystemMessage(newChat);
     return res.status(200).json("Joined group!");
   } catch (err) {
     console.log(err);
@@ -253,8 +251,9 @@ const leaveGroup = async (req, res) => {
     const newLeaveMessage = await ChatMessageModel.create(leaveMessage);
     newChat.push(newLeaveMessage._id);
 
+
     //user is group owner
-    if (group.groupOwner === userId) {
+    if (String(group.groupOwner) === userId) {
       //ownership transfer message
       const newOwner = await UserModel.findById(updatedGroupMembers[0]).exec();
       const ownerMessage = {
@@ -273,7 +272,6 @@ const leaveGroup = async (req, res) => {
           chat: newChat,
         }
       );
-      emitSystemMessage(newChat);
       return res.status(200).json("Left group!");
     } else {
       //user is not group owner
@@ -284,7 +282,6 @@ const leaveGroup = async (req, res) => {
           chat: newChat,
         }
       );
-      emitSystemMessage(newChat);
       return res.status(200).json("Left group!");
     }
   } catch (err) {
