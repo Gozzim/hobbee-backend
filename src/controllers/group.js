@@ -115,8 +115,8 @@ const getGroup = async (req, res) => {
     }
 
     if (
-        !userId ||
-        !group.groupMembers.some((member) => member._id.equals(userId))
+      !userId ||
+      !group.groupMembers.some((member) => member._id.equals(userId))
     ) {
       delete group.location;
       delete group.chat;
@@ -137,6 +137,24 @@ const mine = async (req, res) => {
       .populate("group")
       .exec();
     return res.status(200).json(user.groups);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const recommended = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId).select("hobbies").exec();
+    // Find all groups that have a tag that matches the user's hobbies
+    const groups = await GroupModel.find({
+      tags: {
+        $elemMatch: { $in: user.hobbies },
+      },
+    }).exec();
+    return res.status(200).json(groups);
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -323,6 +341,7 @@ module.exports = {
   getGroups,
   getGroup,
   mine,
+  recommended,
   joinGroup,
   leaveGroup,
   getProcessedGroupChat,
