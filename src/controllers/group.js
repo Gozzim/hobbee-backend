@@ -162,7 +162,7 @@ const joinGroup = async (req, res) => {
       });
     }
     //is group full?
-    if (group.participants <= group.groupMembers.length) {
+    if (group.participants != 0 && group.participants <= group.groupMembers.length) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
@@ -293,6 +293,54 @@ const leaveGroup = async (req, res) => {
   }
 };
 
+const editGroup = async (req, res) => {
+  //initialization
+  const id = req.params.groupId;
+  const userId = req.userId;
+
+  try {
+    //get group and user
+    const group = await GroupModel.findById(id).populate("groupMembers", "username premium.active").populate("groupOwner", "username");
+    console.log(group);
+
+    //is user in group?
+    if (!group.groupMembers.some((member) => member._id.equals(userId))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "User is not in this group.",
+      });
+    }
+    //is user group owner?
+    if(!String(group.groupOwner) === userId) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "User is not the group owner and cannot edit this group.",
+      });
+    }
+
+    group.groupName = req.body.groupName;
+    group.city = req.body.city;
+    group.onOffline = req.body.onOffline;
+    group.tags = req.body.tags;
+    //group.pic = req.body.pic;
+    group.participants = req.body.participants || 0;
+    group.date = req.body.date || [];
+    group.description = req.body.description;
+
+    await group.save();
+
+    console.log(group);
+
+    return res.status(200).json(group);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
 const getProcessedGroupChat = async (req, res) => {
   //initialization
   const id = req.params.groupId;
@@ -322,5 +370,6 @@ module.exports = {
   mine,
   joinGroup,
   leaveGroup,
+  editGroup,
   getProcessedGroupChat,
 };

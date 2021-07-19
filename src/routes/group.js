@@ -9,8 +9,9 @@ router.get("/tags", GroupController.getTags);
 router.get("/groups", GroupController.getGroups);
 router.get("/group/:groupId", middlewares.extractUserId, GroupController.getGroup);
 router.get("/mine", middlewares.checkAuthentication, GroupController.mine);
-router.post("/join-group/:groupId", middlewares.checkAuthentication, GroupController.joinGroup);
-router.post("/leave-group/:groupId", middlewares.checkAuthentication, GroupController.leaveGroup);
-router.get("/group-chat/:groupId", GroupController.getProcessedGroupChat);
+router.post("/join/:groupId", middlewares.checkAuthentication, GroupController.joinGroup);
+router.post("/leave/:groupId", middlewares.checkAuthentication, GroupController.leaveGroup);
+router.get("/chat/:groupId", GroupController.getProcessedGroupChat);
+router.post("/edit/:groupId", middlewares.checkAuthentication, GroupController.editGroup);
 
 module.exports = router;
