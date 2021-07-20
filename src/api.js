@@ -12,6 +12,7 @@ const auth = require("./routes/auth");
 const group = require("./routes/group");
 const storage = require("./routes/storage");
 const payment = require("./routes/payment");
+const user = require("./routes/user");
 
 const api = express();
 
@@ -39,5 +40,6 @@ api.use("/api/auth", auth);
 api.use("/api/group", group);
 api.use("/api/storage", storage);
 api.use("/api/payment", payment);
+api.use("/api/user", user);
 
 module.exports = api;
