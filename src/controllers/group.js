@@ -52,8 +52,8 @@ const create = async (req, res) => {
       onOffline: req.body.onOffline,
       tags: req.body.tags,
       pic: req.body.pic,
-      participants: req.body.participants || 0,
-      date: req.body.date ? [req.body.date] : [],
+      maxMembers: req.body.participants || 0,
+      date: req.body.date,
       location: req.body.location,
       description: req.body.description,
       chat: [creationMessage._id],
@@ -62,7 +62,6 @@ const create = async (req, res) => {
     const groupDB = await GroupModel.create(group);
     return res.status(200).json({ id: groupDB._id });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -75,7 +74,6 @@ const getTags = async (req, res) => {
     const tags = await TagModel.find({}).exec();
     return res.status(200).json(tags);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -88,7 +86,6 @@ const getGroups = async (req, res) => {
     const groups = await GroupModel.find().exec();
     return res.status(200).json(groups);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -131,11 +128,8 @@ const getGroup = async (req, res) => {
 
 const mine = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId)
-      .select("groups")
-      .populate("group")
-      .exec();
-    return res.status(200).json(user.groups);
+    const groups = await GroupModel.find({ groupMembers: req.userId }).exec();
+    return res.status(200).json(groups);
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -162,7 +156,7 @@ const joinGroup = async (req, res) => {
       });
     }
     //is group full?
-    if (group.participants != 0 && group.participants <= group.groupMembers.length) {
+    if (group.maxMembers != 0 && group.maxMembers <= group.groupMembers.length) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
@@ -201,7 +195,6 @@ const joinGroup = async (req, res) => {
     );
     return res.status(200).json("Joined group!");
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -251,7 +244,6 @@ const leaveGroup = async (req, res) => {
     const newLeaveMessage = await ChatMessageModel.create(leaveMessage);
     newChat.push(newLeaveMessage._id);
 
-
     //user is group owner
     if (String(group.groupOwner) === userId) {
       //ownership transfer message
@@ -285,7 +277,6 @@ const leaveGroup = async (req, res) => {
       return res.status(200).json("Left group!");
     }
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -354,7 +345,6 @@ const getProcessedGroupChat = async (req, res) => {
     const newChat = await processChatData(plainChat);
     return res.status(200).json(newChat);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
