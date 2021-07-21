@@ -48,10 +48,15 @@ async function sendFeedbackForm(user, feedback) {
   await sendMail(user.email, "How was your experience?", content);
 }
 
+async function sendPremiumConfirmation(user, receipt) {
+  const content = "Hello " + user.username + ", thank you for buying a premium subscription with Hobb.ee." + receipt; // TODO Mail Template
+  await sendMail(user.email, "Hobb.ee Premium", content);
+}
+
 module.exports = {
-  sendMail,
   sendResetPassword,
   sendConfirmChange,
   sendAccountConfirmation,
   sendFeedbackForm,
+  sendPremiumConfirmation,
 };
