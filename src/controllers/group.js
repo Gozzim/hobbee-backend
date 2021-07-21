@@ -53,7 +53,7 @@ const create = async (req, res) => {
       onOffline: req.body.onOffline,
       tags: req.body.tags,
       pic: req.body.pic,
-      participants: req.body.participants || 0,
+      maxMembers: req.body.participants || 0,
       date: req.body.date ? [req.body.date] : [],
       location: req.body.location,
       description: req.body.description,
@@ -163,7 +163,7 @@ const joinGroup = async (req, res) => {
       });
     }
     //is group full?
-    if (group.participants <= group.groupMembers.length) {
+    if (group.maxMembers <= group.groupMembers.length) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
