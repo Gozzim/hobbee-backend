@@ -8,6 +8,7 @@ const FileModel = require("../models/file");
 const NotificationModel = require("../models/notification");
 const GroupModel = require("../models/group");
 const FeedbackModel = require("../models/feedback");
+const { errorHandler } = require("../middlewares");
 const { sendFeedbackForm } = require("../services/mail");
 
 const getUserNotifications = async (req, res) => {
