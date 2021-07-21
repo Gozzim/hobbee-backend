@@ -38,6 +38,30 @@ const create = async (req, res) => {
 
   try {
     const user = await UserModel.findById(req.userId).exec();
+
+    //has user reached group limit?
+    const groupsWithUser = await GroupModel.find({
+      $and: [
+        {
+          groupMembers: req.userId,
+        },
+        {
+          $or: [{ date: null }, { date: { $gt: Date.now() } }],
+        },
+        {
+          deleted: false,
+        },
+      ],
+    })
+        .countDocuments()
+        .exec();
+    if (!user.premium.active && groupsWithUser >= 5) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You have reached your active group limit.",
+      });
+    }
+
     const message = {
       message: user.username + " created " + req.body.groupName,
       timestamp: Date.now(),
@@ -106,13 +130,13 @@ const getGroup = async (req, res) => {
     if (!group) {
       return res.status(404).json({
         error: "Not Found",
-        message: `Group not found`,
+        message: "Group not found.",
       });
     }
 
     if (
-        !userId ||
-        !group.groupMembers.some((member) => member._id.equals(userId))
+      !userId ||
+      !group.groupMembers.some((member) => member._id.equals(userId))
     ) {
       delete group.location;
       delete group.chat;
@@ -152,24 +176,46 @@ const joinGroup = async (req, res) => {
     if (group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "You are already in this group.",
+        message: "You are already a member of this group.",
       });
     }
     //is group full?
-    if (group.maxMembers != 0 && group.maxMembers <= group.groupMembers.length) {
+    if (
+      group.maxMembers != 0 &&
+      group.maxMembers <= group.groupMembers.length
+    ) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
       });
     }
     //has user reached group limit?
-    const groupsWithUser = await GroupModel.find({ groupMembers: userId })
+    const groupsWithUser = await GroupModel.find({
+      $and: [
+        {
+          groupMembers: userId,
+        },
+        {
+          $or: [{ date: null }, { date: { $gt: Date.now() } }],
+        },
+        {
+          deleted: false,
+        },
+      ],
+    })
       .countDocuments()
       .exec();
     if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
         message: "You have reached your active group limit.",
+      });
+    }
+    //has group expired?
+    if (group.date && group.date < new Date()) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You can't join a group that has expired.",
       });
     }
 
@@ -225,6 +271,13 @@ const leaveGroup = async (req, res) => {
       return res.status(400).json({
         error: "Bad Request",
         message: "You can't leave a group when you are the only member.",
+      });
+    }
+    //has group expired?
+    if (group.date && group.date < new Date()) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You can't leave a group that has expired.",
       });
     }
 
@@ -291,20 +344,29 @@ const editGroup = async (req, res) => {
 
   try {
     //get group and user
-    const group = await GroupModel.findById(id).populate("groupMembers", "username premium.active").populate("groupOwner", "username");
+    const group = await GroupModel.findById(id)
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username");
 
     //is user in group?
     if (!group.groupMembers.some((member) => member._id.equals(userId))) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is not in this group.",
+        message: "You are not a member of this group.",
       });
     }
     //is user group owner?
-    if(!String(group.groupOwner) === userId) {
+    if (!String(group.groupOwner) === userId) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is not the group owner and cannot edit this group.",
+        message: "Only the group owner can edit this group.",
+      });
+    }
+    //has group expired?
+    if (group.date && group.date < new Date()) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You can't edit an expired group.",
       });
     }
 
@@ -321,6 +383,45 @@ const editGroup = async (req, res) => {
     await group.save();
 
     return res.status(200).json(group);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const deleteGroup = async (req, res) => {
+  //initialization
+  const id = req.params.groupId;
+  const userId = req.userId;
+
+  try {
+    //get group and user
+    const group = await GroupModel.findById(id)
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username");
+
+    //is user in group?
+    if (!group.groupMembers.some((member) => member._id.equals(userId))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You are not a member of this group.",
+      });
+    }
+    //is user group owner?
+    if (!String(group.groupOwner) === userId) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Only the group owner can edit this group.",
+      });
+    }
+
+    group.deleted = true;
+
+    await group.save();
+
+    return res.status(200).json("Deleted group!");
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -358,5 +459,6 @@ module.exports = {
   joinGroup,
   leaveGroup,
   editGroup,
+  deleteGroup,
   getProcessedGroupChat,
 };

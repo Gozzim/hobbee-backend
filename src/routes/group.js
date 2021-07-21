@@ -11,7 +11,8 @@ router.get("/group/:groupId", middlewares.extractUserId, GroupController.getGrou
 router.get("/mine", middlewares.checkAuthentication, GroupController.mine);
 router.post("/join/:groupId", middlewares.checkAuthentication, GroupController.joinGroup);
 router.post("/leave/:groupId", middlewares.checkAuthentication, GroupController.leaveGroup);
-router.get("/chat/:groupId", GroupController.getProcessedGroupChat);
 router.post("/edit/:groupId", middlewares.checkAuthentication, GroupController.editGroup);
+router.post("/delete/:groupId", middlewares.checkAuthentication, GroupController.deleteGroup);
+router.get("/chat/:groupId", GroupController.getProcessedGroupChat);
 
 module.exports = router;
