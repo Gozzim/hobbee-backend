@@ -3,13 +3,10 @@
 const datefns = require("date-fns");
 const mongoose = require("mongoose");
 
-const config = require("../config");
 const FileModel = require("../models/file");
 const NotificationModel = require("../models/notification");
-const GroupModel = require("../models/group");
 const FeedbackModel = require("../models/feedback");
 const { errorHandler } = require("../middlewares");
-const { sendFeedbackForm } = require("../services/mail");
 
 const getUserNotifications = async (req, res) => {
   try {
@@ -72,7 +69,7 @@ const handleFeedback = async (req, res) => {
   }
 
   try {
-    const feedback = FeedbackModel.find({ _id: req.params.id, user: req.userId });
+    const feedback = await FeedbackModel.findOne({ _id: req.params.id, user: req.userId });
     if (!feedback) {
       return res.status(404).json({
         error: "Not Found",
@@ -99,44 +96,9 @@ const handleFeedback = async (req, res) => {
   }
 };
 
-const groupMetCheck = async () => {
-  try {
-    const groups = await GroupModel.find({
-      date: { $lt: Date.now() },
-      feedbackSent: false,
-    })
-      .lean()
-      .populate("groupMembers", "username email");
-
-    groups.map(async (group) => {
-      await Promise.all(
-        group.groupMembers.map(async (member) => {
-          const feedback = await FeedbackModel.create({
-            user: member._id,
-            group: group._id,
-          });
-          await NotificationModel.create({
-            user: member._id,
-            group: group._id,
-            notificationType: "Feedback",
-            content: "Please provide feedback on your experience.",
-          });
-          const link = `${config.frontendDomain}/feedback/${feedback._id}`;
-          await sendFeedbackForm(member, link);
-        })
-      );
-      group.feedbackSent = true;
-      await group.save();
-    });
-  } catch (e) {
-    console.log(e.message);
-  }
-};
-
 module.exports = {
   getUserNotifications,
   uploadFile,
   viewFile,
   handleFeedback,
-  groupMetCheck,
 };
