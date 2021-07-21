@@ -137,6 +137,28 @@ const me = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    // get user from database
+    const user = await UserModel.findOne({username: req.params.username}).collation({ locale: "en", strength: 2 }).exec();
+
+    if (!user) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: ERRORS.userNotFound,
+      });
+    }
+    console.log(user);
+    return res.status(200).json(user);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
+
 const updateMe = async (req, res) => {
   // Check if body contains required properties
   const error = errorHandler(req, res, ["username", "email", "dateOfBirth"]);
@@ -173,5 +195,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   me,
+  getUser,
   updateMe,
 };
