@@ -301,7 +301,6 @@ const editGroup = async (req, res) => {
   try {
     //get group and user
     const group = await GroupModel.findById(id).populate("groupMembers", "username premium.active").populate("groupOwner", "username");
-    console.log(group);
 
     //is user in group?
     if (!group.groupMembers.some((member) => member._id.equals(userId))) {
@@ -322,7 +321,8 @@ const editGroup = async (req, res) => {
     group.city = req.body.city;
     group.onOffline = req.body.onOffline;
     group.tags = req.body.tags;
-    //group.pic = req.body.pic;
+    group.pic = req.body.pic;
+    group.location = req.body.location;
     group.participants = req.body.participants || 0;
     group.date = req.body.date || [];
     group.description = req.body.description;
