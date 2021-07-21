@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 const ChatMessageModel = require("../models/chatMessage");
@@ -85,7 +87,7 @@ const getTags = async (req, res) => {
 const getGroups = async (req, res) => {
   try {
     const groups = await GroupModel.find().exec();
-    return res.status(200).json(groups);
+    return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -130,7 +132,7 @@ const getGroup = async (req, res) => {
 const mine = async (req, res) => {
   try {
     const groups = await GroupModel.find({ groupMembers: req.userId }).exec();
-    return res.status(200).json(groups);
+    return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -148,7 +150,7 @@ const recommended = async (req, res) => {
         $elemMatch: { $in: user.hobbies },
       },
     }).exec();
-    return res.status(200).json(groups);
+    return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -325,6 +327,19 @@ const getProcessedGroupChat = async (req, res) => {
     });
   }
 };
+
+function sortGroups(groups) {
+  const groupsWithTimestamp = groups.map((group) => {
+    return {
+      ...group._doc,
+      timestamp: mongoose.Types.ObjectId(group._id).getTimestamp(),
+    };
+  });
+  groupsWithTimestamp.sort((a, b) => {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+  return groupsWithTimestamp;
+}
 
 module.exports = {
   create,
