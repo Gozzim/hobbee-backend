@@ -61,9 +61,9 @@ const viewFile = async (req, res) => {
   }
 };
 
-const handleFeedback = async (req, res) => {
+const handleFeedbackSubmission = async (req, res) => {
   // Check if body contains required properties
-  const error = errorHandler(req, res, ["rating", "comment"]);
+  const error = errorHandler(req, res, ["ratings", "comment"]);
   if (error) {
     return error;
   }
@@ -77,7 +77,7 @@ const handleFeedback = async (req, res) => {
       });
     }
 
-    if (!Array.isArray(req.body.rating) || req.body.length === 4) {
+    if (!Array.isArray(req.body.ratings) || req.body.length === 4) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid feedback data",
@@ -86,8 +86,28 @@ const handleFeedback = async (req, res) => {
 
     feedback.ratings = req.body.ratings;
     feedback.comment = req.body.comment;
+    feedback.completed = true;
     await feedback.save();
     return res.status(200).json();
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const handleFeedbackRequest = async (req, res) => {
+  try {
+    const feedback = await FeedbackModel.findOne({ _id: req.params.id, user: req.userId, completed: false }).populate("group", "groupName");
+    if (!feedback) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Invalid feedback link",
+      });
+    }
+
+    return res.status(200).json(feedback.group);
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -100,5 +120,6 @@ module.exports = {
   getUserNotifications,
   uploadFile,
   viewFile,
-  handleFeedback,
+  handleFeedbackSubmission,
+  handleFeedbackRequest,
 };
