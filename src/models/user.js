@@ -64,13 +64,6 @@ const UserSchema = new mongoose.Schema({
       expiration: Date,
     },
   },
-  groups: [
-    // Implicitly defaults to empty array []
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
-    },
-  ],
 });
 
 UserSchema.set("versionKey", false);

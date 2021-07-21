@@ -132,11 +132,8 @@ const getGroup = async (req, res) => {
 
 const mine = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId)
-      .select("groups")
-      .populate("group")
-      .exec();
-    return res.status(200).json(user.groups);
+    const groups = await GroupModel.find({ groupMembers: req.userId }).exec();
+    return res.status(200).json(groups);
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
