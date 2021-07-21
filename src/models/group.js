@@ -1,12 +1,17 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const { isValidGroupName, isValidDate } = require("../validators/group");
 
 // Define the user schema
 const GroupSchema = new mongoose.Schema({
   groupName: {
     type: String,
     required: true,
+    validate: {
+      validator: isValidGroupName,
+      message: "Invalid Groupname",
+    }
   },
   groupOwner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -26,6 +31,7 @@ const GroupSchema = new mongoose.Schema({
   },
   onOffline: {
     type: String,
+    enum: ["online", "offline", "both"],
     required: true,
   },
   tags: [
@@ -40,27 +46,30 @@ const GroupSchema = new mongoose.Schema({
     ref: "File",
     required: true,
   },
-  participants: {
+  maxMembers: {
     type: Number,
     default: 0,
   },
   date: {
-    type: [Date],
-    default: [],
+    type: Date,
+    validate: {
+      validator: isValidDate,
+      message: "Invalid Date",
+    }
   },
-  location: {
-    type: String,
-  },
-  description: {
-    type: String,
-  },
+  location: String,
+  description: String,
   chat: [
-    {
+    { // TODO: Should not be selected by default
       type: mongoose.Schema.Types.ObjectId,
       ref: "ChatMessage",
       required: true,
     },
   ],
+  feedbackSent: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 GroupSchema.set("versionKey", false);
