@@ -54,7 +54,7 @@ const create = async (req, res) => {
       tags: req.body.tags,
       pic: req.body.pic,
       maxMembers: req.body.participants || 0,
-      date: req.body.date ? [req.body.date] : [],
+      date: req.body.date,
       location: req.body.location,
       description: req.body.description,
       chat: [creationMessage._id],
@@ -63,7 +63,6 @@ const create = async (req, res) => {
     const groupDB = await GroupModel.create(group);
     return res.status(200).json({ id: groupDB._id });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -76,7 +75,6 @@ const getTags = async (req, res) => {
     const tags = await TagModel.find({}).exec();
     return res.status(200).json(tags);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -89,7 +87,6 @@ const getGroups = async (req, res) => {
     const groups = await GroupModel.find().exec();
     return res.status(200).json(groups);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -200,7 +197,6 @@ const joinGroup = async (req, res) => {
     emitSystemMessage(newChat);
     return res.status(200).json("Joined group!");
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -285,7 +281,6 @@ const leaveGroup = async (req, res) => {
       return res.status(200).json("Left group!");
     }
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -306,7 +301,6 @@ const getProcessedGroupChat = async (req, res) => {
     const newChat = await processChatData(plainChat);
     return res.status(200).json(newChat);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
