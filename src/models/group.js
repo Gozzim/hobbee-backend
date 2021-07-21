@@ -66,6 +66,10 @@ const GroupSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  feedbackSent: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 GroupSchema.set("versionKey", false);
