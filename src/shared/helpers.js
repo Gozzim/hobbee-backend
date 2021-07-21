@@ -3,16 +3,16 @@ const jwt = require("jsonwebtoken");
 const config = require("../config");
 const { SUBSCRIPTION_PLAN } = require("./Constants");
 
-const getPlanIdFromRequest = async (planId) => {
+const getPlanFromId = async (planId) => {
   switch (planId) {
-    case 3:
-      return SUBSCRIPTION_PLAN.elite;
-    case 2:
-      return SUBSCRIPTION_PLAN.advanced;
-    case 1:
-      return SUBSCRIPTION_PLAN.standard;
+    case SUBSCRIPTION_PLAN.elite:
+      return "Elite (12 Months)";
+    case SUBSCRIPTION_PLAN.advanced:
+      return "Advanced (3 Months)";
+    case SUBSCRIPTION_PLAN.standard:
+      return "Standard (1 Month)";
     default:
-      return 0;
+      return "No Premium :(";
   }
 };
 
@@ -27,6 +27,6 @@ const generateToken = async (user) => {
 };
 
 module.exports = {
-  getPlanIdFromRequest,
+  getPlanFromId,
   generateToken,
 };
