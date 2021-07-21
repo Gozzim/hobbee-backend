@@ -4,6 +4,7 @@ const {
   cancelPayPalSubscriptionRequest,
 } = require("../services/payment");
 const UserModel = require("../models/user");
+const { getPlanFromId } = require("../shared/helpers");
 const { generateToken } = require("../shared/helpers");
 const { errorHandler } = require("../middlewares");
 
@@ -59,11 +60,25 @@ const handlePremiumRequest = async (req, res) => {
     user.premium.subscription.id = subscription.id;
     user.premium.subscription.plan = subscription.plan_id;
     user.premium.subscription.expiration = subscription.billing_info.next_billing_time;
+    user.premium.canceled = false;
     user.premium.active = true;
     await user.save();
 
+    const plan = await getPlanFromId(subscription.plan_id);
+    const date = (new Date(subscription.billing_info.last_payment.time)).toLocaleDateString();
+    const renewal = (new Date(subscription.billing_info.next_billing_time)).toLocaleDateString();
+    const receipt = {
+      "First name": subscription.subscriber.name.given_name,
+      "Last name": subscription.subscriber.name.surname,
+      "E-mail address": subscription.subscriber.email_address,
+      "Premium plan": plan,
+      "Subscription date": date,
+      "Amount": subscription.billing_info.last_payment.amount.value + " " + subscription.billing_info.last_payment.amount.currency_code,
+      "Renewal date": renewal,
+    };
+
     const token = await generateToken(user);
-    return res.status(200).json({ token: token });
+    return res.status(200).json({ token: token, receipt: receipt });
   } catch (e) {
     return res.status(500).json({
       error: "Internal Server Error",
@@ -90,6 +105,8 @@ const cancelSubscription = async (req, res) => {
 
       // If cancel was successful
       if (cancelReq.status === 204) {
+        user.premium.canceled = true;
+        await user.save();
         return res.status(200).json();
       }
     }
