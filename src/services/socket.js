@@ -95,7 +95,6 @@ const socketConnection = async (server) => {
     socket.on("new system message", async (data) => {
       const group = await GroupModel.findById(data.groupId).exec();
       const returnChat = await processChatData(group.chat);
-      console.log("new system message for group "+data.groupId);
       socket.emit("return message", returnChat);
       socket.to(data.groupId).emit("return message", returnChat);
     });

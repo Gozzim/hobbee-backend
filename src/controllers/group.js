@@ -158,7 +158,7 @@ const joinGroup = async (req, res) => {
     if (group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is already in group.",
+        message: "You are already in this group.",
       });
     }
     //is group full?
@@ -175,7 +175,7 @@ const joinGroup = async (req, res) => {
     if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "You can't join any more groups",
+        message: "You have reached your active group limit.",
       });
     }
 
@@ -223,7 +223,7 @@ const leaveGroup = async (req, res) => {
     if (!group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is not in this group.",
+        message: "Your are not a member of this group.",
       });
     }
     //is user last man standing?
@@ -231,7 +231,7 @@ const leaveGroup = async (req, res) => {
       //group owner tries to leave as only member left
       return res.status(400).json({
         error: "Bad Request",
-        message: "You cannot leave the group if you're the only one in it.",
+        message: "You can't leave a group when you are the only member.",
       });
     }
 
