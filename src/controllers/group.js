@@ -52,7 +52,7 @@ const create = async (req, res) => {
       onOffline: req.body.onOffline,
       tags: req.body.tags,
       pic: req.body.pic,
-      maxMembers: req.body.participants || 0,
+      maxMembers: req.body.maxMembers || 0,
       date: req.body.date,
       location: req.body.location,
       description: req.body.description,
@@ -314,17 +314,14 @@ const editGroup = async (req, res) => {
     group.tags = req.body.tags;
     group.pic = req.body.pic;
     group.location = req.body.location;
-    group.participants = req.body.participants || 0;
-    group.date = req.body.date || [];
+    group.maxMembers = req.body.maxMembers || 0;
+    group.date = req.body.date;
     group.description = req.body.description;
 
     await group.save();
 
-    console.log(group);
-
     return res.status(200).json(group);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
