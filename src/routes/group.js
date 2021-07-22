@@ -4,14 +4,16 @@ const router = express.Router();
 const GroupController = require("../controllers/group");
 const middlewares = require("../middlewares");
 
-router.post("/create", middlewares.checkAuthentication, GroupController.create);
-router.get("/tags", GroupController.getTags);
-router.get("/groups", GroupController.getGroups);
-router.get("/group/:groupId", middlewares.extractUserId, GroupController.getGroup);
-router.get("/mine", middlewares.checkAuthentication, GroupController.mine);
-router.post("/join/:groupId", middlewares.checkAuthentication, GroupController.joinGroup);
-router.post("/leave/:groupId", middlewares.checkAuthentication, GroupController.leaveGroup);
-router.get("/chat/:groupId", GroupController.getProcessedGroupChat);
-router.post("/edit/:groupId", middlewares.checkAuthentication, GroupController.editGroup);
+router.post("/create", middlewares.checkAuthentication, GroupController.create); // prettier-ignore
+router.get("/tags", GroupController.getTags); // prettier-ignore
+router.get("/groups", GroupController.getGroups); // prettier-ignore
+router.get("/group/:groupId", middlewares.extractUserId, GroupController.getGroup); // prettier-ignore
+router.get("/mine", middlewares.checkAuthentication, GroupController.mine); // prettier-ignore
+router.get("/recommended", middlewares.checkAuthentication, GroupController.recommended); // prettier-ignore
+router.get("/in-my-area", middlewares.checkAuthentication, GroupController.inMyArea); // prettier-ignore
+router.post("/join/:groupId", middlewares.checkAuthentication, GroupController.joinGroup); // prettier-ignore
+router.post("/leave/:groupId", middlewares.checkAuthentication, GroupController.leaveGroup); // prettier-ignore
+router.get("/chat/:groupId", GroupController.getProcessedGroupChat); // prettier-ignore
+router.post("/edit/:groupId", middlewares.checkAuthentication, GroupController.editGroup); // prettier-ignore
 
 module.exports = router;

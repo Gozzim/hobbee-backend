@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 const ChatMessageModel = require("../models/chatMessage");
@@ -84,7 +86,7 @@ const getTags = async (req, res) => {
 const getGroups = async (req, res) => {
   try {
     const groups = await GroupModel.find().exec();
-    return res.status(200).json(groups);
+    return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -111,8 +113,8 @@ const getGroup = async (req, res) => {
     }
 
     if (
-        !userId ||
-        !group.groupMembers.some((member) => member._id.equals(userId))
+      !userId ||
+      !group.groupMembers.some((member) => member._id.equals(userId))
     ) {
       delete group.location;
       delete group.chat;
@@ -129,7 +131,44 @@ const getGroup = async (req, res) => {
 const mine = async (req, res) => {
   try {
     const groups = await GroupModel.find({ groupMembers: req.userId }).exec();
-    return res.status(200).json(groups);
+    return res.status(200).json(sortGroups(groups));
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const recommended = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId)
+      .select("hobbies city")
+      .exec();
+    // Find all groups that have a tag that matches the user's hobbies
+    const groups = await GroupModel.find({
+      tags: {
+        $elemMatch: { $in: user.hobbies },
+      },
+      city: user.city,
+    }).exec();
+    return res.status(200).json(sortGroups(groups));
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const inMyArea = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId).select("city").exec();
+    // Find all groups that have a tag that matches the user's hobbies
+    const groups = await GroupModel.find({
+      city: user.city,
+    }).exec();
+    return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -156,7 +195,10 @@ const joinGroup = async (req, res) => {
       });
     }
     //is group full?
-    if (group.maxMembers != 0 && group.maxMembers <= group.groupMembers.length) {
+    if (
+      group.maxMembers != 0 &&
+      group.maxMembers <= group.groupMembers.length
+    ) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
@@ -291,7 +333,9 @@ const editGroup = async (req, res) => {
 
   try {
     //get group and user
-    const group = await GroupModel.findById(id).populate("groupMembers", "username premium.active").populate("groupOwner", "username");
+    const group = await GroupModel.findById(id)
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username");
 
     //is user in group?
     if (!group.groupMembers.some((member) => member._id.equals(userId))) {
@@ -301,7 +345,7 @@ const editGroup = async (req, res) => {
       });
     }
     //is user group owner?
-    if(!String(group.groupOwner) === userId) {
+    if (!String(group.groupOwner) === userId) {
       return res.status(400).json({
         error: "Bad Request",
         message: "User is not the group owner and cannot edit this group.",
@@ -349,12 +393,27 @@ const getProcessedGroupChat = async (req, res) => {
   }
 };
 
+function sortGroups(groups) {
+  const groupsWithTimestamp = groups.map((group) => {
+    return {
+      ...group._doc,
+      timestamp: mongoose.Types.ObjectId(group._id).getTimestamp(),
+    };
+  });
+  groupsWithTimestamp.sort((a, b) => {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+  return groupsWithTimestamp;
+}
+
 module.exports = {
   create,
   getTags,
   getGroups,
   getGroup,
   mine,
+  recommended,
+  inMyArea,
   joinGroup,
   leaveGroup,
   editGroup,
