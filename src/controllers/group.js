@@ -142,12 +142,31 @@ const mine = async (req, res) => {
 
 const recommended = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId).select("hobbies").exec();
+    const user = await UserModel.findById(req.userId)
+      .select("hobbies city")
+      .exec();
     // Find all groups that have a tag that matches the user's hobbies
     const groups = await GroupModel.find({
       tags: {
         $elemMatch: { $in: user.hobbies },
       },
+      city: user.city,
+    }).exec();
+    return res.status(200).json(sortGroups(groups));
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const inMyArea = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId).select("city").exec();
+    // Find all groups that have a tag that matches the user's hobbies
+    const groups = await GroupModel.find({
+      city: user.city,
     }).exec();
     return res.status(200).json(sortGroups(groups));
   } catch (err) {
@@ -176,7 +195,10 @@ const joinGroup = async (req, res) => {
       });
     }
     //is group full?
-    if (group.maxMembers != 0 && group.maxMembers <= group.groupMembers.length) {
+    if (
+      group.maxMembers != 0 &&
+      group.maxMembers <= group.groupMembers.length
+    ) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
@@ -311,7 +333,9 @@ const editGroup = async (req, res) => {
 
   try {
     //get group and user
-    const group = await GroupModel.findById(id).populate("groupMembers", "username premium.active").populate("groupOwner", "username");
+    const group = await GroupModel.findById(id)
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username");
 
     //is user in group?
     if (!group.groupMembers.some((member) => member._id.equals(userId))) {
@@ -321,7 +345,7 @@ const editGroup = async (req, res) => {
       });
     }
     //is user group owner?
-    if(!String(group.groupOwner) === userId) {
+    if (!String(group.groupOwner) === userId) {
       return res.status(400).json({
         error: "Bad Request",
         message: "User is not the group owner and cannot edit this group.",
@@ -389,6 +413,7 @@ module.exports = {
   getGroup,
   mine,
   recommended,
+  inMyArea,
   joinGroup,
   leaveGroup,
   editGroup,
