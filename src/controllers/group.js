@@ -346,7 +346,7 @@ const editGroup = async (req, res) => {
     //get group and user
     const group = await GroupModel.findById(id)
       .populate("groupMembers", "username premium.active")
-      .populate("groupOwner", "username");
+      .populate("groupOwner", "username premium.active");
 
     //is user in group?
     if (!group.groupMembers.some((member) => member._id.equals(userId))) {

@@ -69,6 +69,10 @@ const socketConnection = async (server) => {
         isSystemMessage: data.isSystemMessage,
       };
 
+      if(!data.message || data.message === "" || !data.message.replace(/\s/g, '').length) {
+        return;
+      }
+
       //db write operation
       const newMessage = await ChatMessageModel.create(message);
 
