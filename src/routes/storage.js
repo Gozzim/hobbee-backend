@@ -18,7 +18,7 @@ router.post(
   StorageController.setNotificationRead
 );
 
-router.post(
+router.get(
   "/notifications/clear",
   middlewares.checkAuthentication,
   StorageController.clearNotifications

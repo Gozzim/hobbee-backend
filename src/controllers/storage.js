@@ -117,6 +117,9 @@ const handleFeedbackSubmission = async (req, res) => {
     feedback.comment = req.body.comment;
     feedback.completed = true;
     await feedback.save();
+
+    await NotificationModel.deleteOne({user: req.userId, group: feedback.group, notificationType: "Feedback"});
+
     return res.status(200).json();
   } catch (err) {
     return res.status(500).json({

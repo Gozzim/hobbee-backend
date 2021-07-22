@@ -6,6 +6,7 @@ const config = require("../config");
 const NotificationModel = require("../models/notification");
 const FeedbackModel = require("../models/feedback");
 const GroupModel = require("../models/group");
+const { GROUP_CHECK_PERIOD } = require("../shared/Constants");
 const { sendFeedbackForm } = require("../services/mail");
 
 const groupMetCheck = async () => {
@@ -48,7 +49,7 @@ const groupReminderCheck = async () => {
     const groups = await GroupModel.find({
       date: {
         $gt: Date.now(),
-        $lt: new Date(Date.now() + 21600000),
+        $lt: new Date(Date.now() + GROUP_CHECK_PERIOD),
       },
     }).exec();
 
