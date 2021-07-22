@@ -69,6 +69,10 @@ const GroupSchema = new mongoose.Schema({
   feedbackSent: {
     type: Boolean,
     default: false,
+  },
+  deleted: {
+    type: Boolean,
+    default: false,
   }
 });
 

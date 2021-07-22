@@ -14,5 +14,7 @@ router.post("/update", middlewares.checkAuthentication, UserController.updateMe)
 router.get("/me", middlewares.checkAuthentication, UserController.me); // get own username, requires a logged in user
 router.get("/:username", UserController.getUser); // get someones user information
 
+router.post("/report/:username", middlewares.checkAuthentication, UserController.createUserReport);
+
 
 module.exports = router;

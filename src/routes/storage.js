@@ -13,6 +13,18 @@ router.get(
 );
 
 router.post(
+  "/notifications/read/:notification",
+  middlewares.checkAuthentication,
+  StorageController.setNotificationRead
+);
+
+router.get(
+  "/notifications/clear",
+  middlewares.checkAuthentication,
+  StorageController.clearNotifications
+);
+
+router.post(
   "/file/upload",
   middlewares.checkAuthentication,
   StorageController.uploadFile
@@ -23,7 +35,13 @@ router.get("/file/view/:fileId", StorageController.viewFile);
 router.post(
   "/feedback/:id",
   middlewares.checkAuthentication,
-  StorageController.handleFeedback
+  StorageController.handleFeedbackSubmission
+);
+
+router.get(
+  "/feedback/:id",
+  middlewares.checkAuthentication,
+  StorageController.handleFeedbackRequest
 );
 
 module.exports = router;
