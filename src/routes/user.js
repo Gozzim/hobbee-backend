@@ -12,6 +12,7 @@ router.post("/reset", UserController.resetPassword); // Change user password fro
 router.post("/update", middlewares.checkAuthentication, UserController.updateMe); // Update userdata from profile, requires a logged in user
 
 router.get("/me", middlewares.checkAuthentication, UserController.me); // get own username, requires a logged in user
+router.get("/:username", UserController.getUser); // get someones user information
 
 router.post("/report/:username", middlewares.checkAuthentication, UserController.createUserReport);
 

@@ -3,13 +3,10 @@
 const datefns = require("date-fns");
 const mongoose = require("mongoose");
 
-const config = require("../config");
 const FileModel = require("../models/file");
 const NotificationModel = require("../models/notification");
-const GroupModel = require("../models/group");
 const FeedbackModel = require("../models/feedback");
 const { errorHandler } = require("../middlewares");
-const { sendFeedbackForm } = require("../services/mail");
 
 const getUserNotifications = async (req, res) => {
   try {
@@ -64,15 +61,15 @@ const viewFile = async (req, res) => {
   }
 };
 
-const handleFeedback = async (req, res) => {
+const handleFeedbackSubmission = async (req, res) => {
   // Check if body contains required properties
-  const error = errorHandler(req, res, ["rating", "comment"]);
+  const error = errorHandler(req, res, ["ratings", "comment"]);
   if (error) {
     return error;
   }
 
   try {
-    const feedback = FeedbackModel.find({ _id: req.params.id, user: req.userId });
+    const feedback = await FeedbackModel.findOne({ _id: req.params.id, user: req.userId });
     if (!feedback) {
       return res.status(404).json({
         error: "Not Found",
@@ -80,7 +77,7 @@ const handleFeedback = async (req, res) => {
       });
     }
 
-    if (!Array.isArray(req.body.rating) || req.body.length === 4) {
+    if (!Array.isArray(req.body.ratings) || req.body.length === 4) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid feedback data",
@@ -89,6 +86,7 @@ const handleFeedback = async (req, res) => {
 
     feedback.ratings = req.body.ratings;
     feedback.comment = req.body.comment;
+    feedback.completed = true;
     await feedback.save();
     return res.status(200).json();
   } catch (err) {
@@ -99,37 +97,22 @@ const handleFeedback = async (req, res) => {
   }
 };
 
-const groupMetCheck = async () => {
+const handleFeedbackRequest = async (req, res) => {
   try {
-    const groups = await GroupModel.find({
-      date: { $lt: Date.now() },
-      feedbackSent: false,
-    })
-      .lean()
-      .populate("groupMembers", "username email");
+    const feedback = await FeedbackModel.findOne({ _id: req.params.id, user: req.userId, completed: false }).populate("group", "groupName");
+    if (!feedback) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Invalid feedback link",
+      });
+    }
 
-    groups.map(async (group) => {
-      await Promise.all(
-        group.groupMembers.map(async (member) => {
-          const feedback = await FeedbackModel.create({
-            user: member._id,
-            group: group._id,
-          });
-          await NotificationModel.create({
-            user: member._id,
-            group: group._id,
-            notificationType: "Feedback",
-            content: "Please provide feedback on your experience.",
-          });
-          const link = `${config.frontendDomain}/feedback/${feedback._id}`;
-          await sendFeedbackForm(member, link);
-        })
-      );
-      group.feedbackSent = true;
-      await group.save();
+    return res.status(200).json(feedback.group);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
     });
-  } catch (e) {
-    console.log(e.message);
   }
 };
 
@@ -137,6 +120,6 @@ module.exports = {
   getUserNotifications,
   uploadFile,
   viewFile,
-  handleFeedback,
-  groupMetCheck,
+  handleFeedbackSubmission,
+  handleFeedbackRequest,
 };

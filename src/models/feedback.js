@@ -28,6 +28,6 @@ const FeedbackSchema = new mongoose.Schema({
   }
 });
 
-FeedbackSchema.set("versionKey", true);
+FeedbackSchema.set("versionKey", false);
 
 module.exports = mongoose.model("Feedback", FeedbackSchema);
