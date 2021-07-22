@@ -24,6 +24,10 @@ const NotificationsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  link: {
+    type: String,
+    required: true,
+  }
 });
 
 NotificationsSchema.set("timestamps", true);
