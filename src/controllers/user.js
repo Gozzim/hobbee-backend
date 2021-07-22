@@ -3,6 +3,7 @@ const crypto = require("crypto");
 
 const config = require("../config");
 const UserModel = require("../models/user");
+const UserReportModel = require("../models/userReport");
 const { ERRORS } = require("../shared/Constants");
 const ResetTokenModel = require("../models/resetToken");
 const { sendConfirmChange, sendResetPassword } = require("../services/mail");
@@ -169,9 +170,47 @@ const updateMe = async (req, res) => {
   }
 };
 
+const createUserReport = async (req, res) => {
+  try {
+    // get users from database
+    let reportedUser = await UserModel.findOne({username: req.params.username}).collation({ locale: "en", strength: 2 }).exec();
+    let sendingUser = await UserModel.findById(req.userId).exec();
+
+    if (!reportedUser) {
+      return res.status(404).json({
+        error: "No User to report on",
+        message: ERRORS.userNotFound,
+      });
+    }
+
+    const userReport = {
+      sendingUser: sendingUser._id,
+      reportedUser: reportedUser._id,
+      inappropriateUsername: req.body.reportForm.inappropriateUsername,
+      threatsEtc: req.body.reportForm.threatsEtc,
+      hateSpeechEtc: req.body.reportForm.hateSpeechEtc,
+      spamEtc: req.body.reportForm.spamEtc,
+      inappropriateContent: req.body.reportForm.inappropriateContent,
+      noShow: req.body.reportForm.noShow,
+      other: req.body.reportForm.other,
+      comment: req.body.reportForm.comment,
+    }
+
+    await UserReportModel.create(userReport);
+
+    return res.status(200).json("Report successful!");
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+}
+
 module.exports = {
   forgotPassword,
   resetPassword,
   me,
   updateMe,
+  createUserReport,
 };

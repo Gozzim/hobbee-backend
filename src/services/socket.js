@@ -27,7 +27,7 @@ async function processChatData(chat) {
           message: chatMessage.message,
           sender: chatMessage.sender,
           timestamp: styledTimestamp,
-          _id: chatMessage.id,
+          _id: chatMessage._id,
           senderName: name,
         };
         //system message
@@ -36,7 +36,7 @@ async function processChatData(chat) {
           isSystemMessage: chatMessage.isSystemMessage,
           message: chatMessage.message,
           timestamp: styledTimestamp,
-          _id: chatMessage.id,
+          _id: chatMessage._id,
         };
       }
     }));
@@ -44,17 +44,6 @@ async function processChatData(chat) {
     console.log(e);
   }
 }
-
-// Emitters
-const emitSystemMessage = async (data) => {
-  try {
-    const newChat = await processChatData(data);
-    io.emit("return message", newChat);
-    io.broadcast.emit("return message", newChat);
-  } catch (e) {
-    console.log(e.message)
-  }
-};
 
 const socketConnection = async (server) => {
   io = require("socket.io")(server, {
@@ -80,6 +69,10 @@ const socketConnection = async (server) => {
         isSystemMessage: data.isSystemMessage,
       };
 
+      if(!data.message || data.message === "" || !data.message.replace(/\s/g, '').length) {
+        return;
+      }
+
       //db write operation
       const newMessage = await ChatMessageModel.create(message);
 
@@ -103,10 +96,17 @@ const socketConnection = async (server) => {
       }
     });
 
+    socket.on("system update message", async (data) => {
+      const group = await GroupModel.findById(data.groupId).exec();
+      const returnChat = await processChatData(group.chat);
+      socket.emit("return message", returnChat);
+      socket.to(data.groupId).emit("return message", returnChat);
+    });
+
     socket.on("disconnect", () => {
       console.info(`Client disconnected [id=${socket.id}]`);
     });
   });
 };
 
-module.exports = { processChatData, emitSystemMessage, socketConnection }
+module.exports = { processChatData, socketConnection }

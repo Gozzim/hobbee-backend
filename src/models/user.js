@@ -49,6 +49,7 @@ const UserSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
     },
+    canceled: Boolean,
     subscription: {
       id: {
         type: String,
@@ -60,18 +61,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         select: false,
       },
-      expiration: {
-        type: Date,
-      },
+      expiration: Date,
     },
   },
-  groups: [
-    // Implicitly defaults to empty array []
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
-    },
-  ],
 });
 
 UserSchema.set("versionKey", false);

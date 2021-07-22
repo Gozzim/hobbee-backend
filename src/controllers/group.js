@@ -2,7 +2,6 @@ const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 const ChatMessageModel = require("../models/chatMessage");
 const UserModel = require("../models/user");
-const { emitSystemMessage } = require("../services/socket");
 const { processChatData } = require("../services/socket");
 
 const create = async (req, res) => {
@@ -39,6 +38,30 @@ const create = async (req, res) => {
 
   try {
     const user = await UserModel.findById(req.userId).exec();
+
+    //has user reached group limit?
+    const groupsWithUser = await GroupModel.find({
+      $and: [
+        {
+          groupMembers: req.userId,
+        },
+        {
+          $or: [{ date: null }, { date: { $gt: Date.now() } }],
+        },
+        {
+          deleted: false,
+        },
+      ],
+    })
+        .countDocuments()
+        .exec();
+    if (!user.premium.active && groupsWithUser >= 5) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You have reached your active group limit.",
+      });
+    }
+
     const message = {
       message: user.username + " created " + req.body.groupName,
       timestamp: Date.now(),
@@ -53,8 +76,8 @@ const create = async (req, res) => {
       onOffline: req.body.onOffline,
       tags: req.body.tags,
       pic: req.body.pic,
-      participants: req.body.participants || 0,
-      date: req.body.date ? [req.body.date] : [],
+      maxMembers: req.body.maxMembers || 0,
+      date: req.body.date,
       location: req.body.location,
       description: req.body.description,
       chat: [creationMessage._id],
@@ -63,7 +86,6 @@ const create = async (req, res) => {
     const groupDB = await GroupModel.create(group);
     return res.status(200).json({ id: groupDB._id });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -76,7 +98,6 @@ const getTags = async (req, res) => {
     const tags = await TagModel.find({}).exec();
     return res.status(200).json(tags);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -89,7 +110,6 @@ const getGroups = async (req, res) => {
     const groups = await GroupModel.find().exec();
     return res.status(200).json(groups);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -104,19 +124,19 @@ const getGroup = async (req, res) => {
     const group = await GroupModel.findById(req.params.groupId)
       .lean()
       .populate("groupMembers", "username premium.active")
-      .populate("groupOwner", "username")
+      .populate("groupOwner", "username premium.active")
       .exec();
 
     if (!group) {
       return res.status(404).json({
         error: "Not Found",
-        message: `Group not found`,
+        message: "Group not found.",
       });
     }
 
     if (
-        !userId ||
-        !group.groupMembers.some((member) => member._id.equals(userId))
+      !userId ||
+      !group.groupMembers.some((member) => member._id.equals(userId))
     ) {
       delete group.location;
       delete group.chat;
@@ -132,11 +152,8 @@ const getGroup = async (req, res) => {
 
 const mine = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId)
-      .select("groups")
-      .populate("group")
-      .exec();
-    return res.status(200).json(user.groups);
+    const groups = await GroupModel.find({ groupMembers: req.userId }).exec();
+    return res.status(200).json(groups);
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -159,24 +176,46 @@ const joinGroup = async (req, res) => {
     if (group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is already in group.",
+        message: "You are already a member of this group.",
       });
     }
     //is group full?
-    if (group.participants <= group.groupMembers.length) {
+    if (
+      group.maxMembers != 0 &&
+      group.maxMembers <= group.groupMembers.length
+    ) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
       });
     }
     //has user reached group limit?
-    const groupsWithUser = await GroupModel.find({ groupMembers: userId })
+    const groupsWithUser = await GroupModel.find({
+      $and: [
+        {
+          groupMembers: userId,
+        },
+        {
+          $or: [{ date: null }, { date: { $gt: Date.now() } }],
+        },
+        {
+          deleted: false,
+        },
+      ],
+    })
       .countDocuments()
       .exec();
     if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "You can't join any more groups",
+        message: "You have reached your active group limit.",
+      });
+    }
+    //has group expired?
+    if (group.date && group.date < new Date()) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You can't join a group that has expired.",
       });
     }
 
@@ -200,10 +239,8 @@ const joinGroup = async (req, res) => {
         chat: newChat,
       }
     );
-    emitSystemMessage(newChat);
     return res.status(200).json("Joined group!");
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -225,7 +262,7 @@ const leaveGroup = async (req, res) => {
     if (!group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is not in this group.",
+        message: "Your are not a member of this group.",
       });
     }
     //is user last man standing?
@@ -233,7 +270,14 @@ const leaveGroup = async (req, res) => {
       //group owner tries to leave as only member left
       return res.status(400).json({
         error: "Bad Request",
-        message: "You cannot leave the group if you're the only one in it.",
+        message: "You can't leave a group when you are the only member.",
+      });
+    }
+    //has group expired?
+    if (group.date && group.date < new Date()) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You can't leave a group that has expired.",
       });
     }
 
@@ -254,7 +298,7 @@ const leaveGroup = async (req, res) => {
     newChat.push(newLeaveMessage._id);
 
     //user is group owner
-    if (group.groupOwner === userId) {
+    if (String(group.groupOwner) === userId) {
       //ownership transfer message
       const newOwner = await UserModel.findById(updatedGroupMembers[0]).exec();
       const ownerMessage = {
@@ -273,7 +317,6 @@ const leaveGroup = async (req, res) => {
           chat: newChat,
         }
       );
-      emitSystemMessage(newChat);
       return res.status(200).json("Left group!");
     } else {
       //user is not group owner
@@ -284,11 +327,102 @@ const leaveGroup = async (req, res) => {
           chat: newChat,
         }
       );
-      emitSystemMessage(newChat);
       return res.status(200).json("Left group!");
     }
   } catch (err) {
-    console.log(err);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const editGroup = async (req, res) => {
+  //initialization
+  const id = req.params.groupId;
+  const userId = req.userId;
+
+  try {
+    //get group and user
+    const group = await GroupModel.findById(id)
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username premium.active");
+
+    //is user in group?
+    if (!group.groupMembers.some((member) => member._id.equals(userId))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You are not a member of this group.",
+      });
+    }
+    //is user group owner?
+    if (!String(group.groupOwner) === userId) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Only the group owner can edit this group.",
+      });
+    }
+    //has group expired?
+    if (group.date && group.date < new Date()) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You can't edit an expired group.",
+      });
+    }
+
+    group.groupName = req.body.groupName;
+    group.city = req.body.city;
+    group.onOffline = req.body.onOffline;
+    group.tags = req.body.tags;
+    group.pic = req.body.pic;
+    group.location = req.body.location;
+    group.maxMembers = req.body.maxMembers || 0;
+    group.date = req.body.date;
+    group.description = req.body.description;
+
+    await group.save();
+
+    return res.status(200).json(group);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const deleteGroup = async (req, res) => {
+  //initialization
+  const id = req.params.groupId;
+  const userId = req.userId;
+
+  try {
+    //get group and user
+    const group = await GroupModel.findById(id)
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username");
+
+    //is user in group?
+    if (!group.groupMembers.some((member) => member._id.equals(userId))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You are not a member of this group.",
+      });
+    }
+    //is user group owner?
+    if (!String(group.groupOwner) === userId) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Only the group owner can edit this group.",
+      });
+    }
+
+    group.deleted = true;
+
+    await group.save();
+
+    return res.status(200).json("Deleted group!");
+  } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -309,7 +443,6 @@ const getProcessedGroupChat = async (req, res) => {
     const newChat = await processChatData(plainChat);
     return res.status(200).json(newChat);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       error: "Internal server error",
       message: err.message,
@@ -325,5 +458,7 @@ module.exports = {
   mine,
   joinGroup,
   leaveGroup,
+  editGroup,
+  deleteGroup,
   getProcessedGroupChat,
 };
