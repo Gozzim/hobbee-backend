@@ -20,14 +20,14 @@ const NotificationsSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  read: {
-    type: Boolean,
-    default: false,
-  },
   content: {
     type: String,
     required: true,
   },
+  link: {
+    type: String,
+    required: true,
+  }
 });
 
 NotificationsSchema.set("timestamps", true);

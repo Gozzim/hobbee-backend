@@ -23,6 +23,8 @@ const SUBSCRIPTION_PLAN = {
   standard: "P-0MA943175X946230LMDZRZSQ",
 };
 
+const GROUP_CHECK_PERIOD = 21600000; // 6 hours
+
 module.exports = {
   MAIL_REGEX,
   PASS_REGEX,
@@ -30,4 +32,5 @@ module.exports = {
   GROUPNAME_REGEX,
   ERRORS,
   SUBSCRIPTION_PLAN,
+  GROUP_CHECK_PERIOD,
 };

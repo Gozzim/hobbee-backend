@@ -29,6 +29,35 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
+const setNotificationRead = async (req, res) => {
+  try {
+    await NotificationModel.deleteOne({
+      _id: req.params.notification,
+      user: req.userId,
+    });
+
+    return res.status(200).json();
+  } catch (e) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: e.message,
+    });
+  }
+};
+
+const clearNotifications = async (req, res) => {
+  try {
+    await NotificationModel.deleteMany({user: req.userId});
+
+    return res.status(200).json();
+  } catch (e) {
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: e.message,
+    });
+  }
+};
+
 const uploadFile = async (req, res) => {
   try {
     const file = await FileModel.create({
@@ -88,6 +117,9 @@ const handleFeedbackSubmission = async (req, res) => {
     feedback.comment = req.body.comment;
     feedback.completed = true;
     await feedback.save();
+
+    await NotificationModel.deleteOne({user: req.userId, group: feedback.group, notificationType: "Feedback"});
+
     return res.status(200).json();
   } catch (err) {
     return res.status(500).json({
@@ -118,6 +150,8 @@ const handleFeedbackRequest = async (req, res) => {
 
 module.exports = {
   getUserNotifications,
+  setNotificationRead,
+  clearNotifications,
   uploadFile,
   viewFile,
   handleFeedbackSubmission,
