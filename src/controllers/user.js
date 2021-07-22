@@ -18,7 +18,7 @@ const forgotPassword = async (req, res) => {
   }
 
   try {
-    const user = await UserModel.findOne({ email: req.body.email }).exec();
+    const user = await UserModel.findOne({ email: req.body.email }).select("username email");
     if (!user) {
       return res.status(404).json({
         error: "Not Found",
@@ -51,7 +51,6 @@ const forgotPassword = async (req, res) => {
     });
   }
 };
-
 
 const resetPassword = async (req, res) => {
   // Check if body contains required properties
@@ -119,7 +118,11 @@ const resetPassword = async (req, res) => {
 const me = async (req, res) => {
   try {
     // get own user from database
-    let user = await UserModel.findById(req.userId).exec();
+    const user = await UserModel.findById(req.userId)
+      .select(
+        "username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.canceled premium.subscription.plan"
+      )
+      .exec();
 
     if (!user) {
       return res.status(404).json({
@@ -167,8 +170,7 @@ const updateMe = async (req, res) => {
   }
 
   try {
-
-    let user = await UserModel.findById(req.userId);
+    let user = await UserModel.findById(req.userId).select("username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.canceled premium.subscription.plan");
 
     if (!user) {
       return res.status(404).json({

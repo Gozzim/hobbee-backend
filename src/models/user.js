@@ -18,6 +18,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
+    select: false,
     validate: {
       validator: isValidEmail,
       message: "Invalid Email",
@@ -31,10 +32,16 @@ const UserSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
     required: true,
+    select: false,
     validate: {
       validator: isValidDateOfBirth,
       message: "Invalid date of birth"
     },
+  },
+  city: {
+    type: String,
+    required: true,
+    select: false,
   },
   avatar: String,
   hobbies: [

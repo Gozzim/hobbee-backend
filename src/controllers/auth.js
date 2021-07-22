@@ -76,6 +76,7 @@ const register = async (req, res) => {
     "email",
     "password",
     "dateOfBirth",
+    "city",
   ]);
   if (error) {
     return error;
@@ -113,6 +114,7 @@ const register = async (req, res) => {
       password: hashedPassword,
       dateOfBirth: req.body.dateOfBirth,
       hobbies: req.body.hobbies,
+      city: req.body.city,
     };
 
     // create the user in the database
