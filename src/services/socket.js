@@ -92,7 +92,7 @@ const socketConnection = async (server) => {
       }
     });
 
-    socket.on("new system message", async (data) => {
+    socket.on("system update message", async (data) => {
       const group = await GroupModel.findById(data.groupId).exec();
       const returnChat = await processChatData(group.chat);
       socket.emit("return message", returnChat);

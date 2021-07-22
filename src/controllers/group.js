@@ -124,7 +124,7 @@ const getGroup = async (req, res) => {
     const group = await GroupModel.findById(req.params.groupId)
       .lean()
       .populate("groupMembers", "username premium.active")
-      .populate("groupOwner", "username")
+      .populate("groupOwner", "username premium.active")
       .exec();
 
     if (!group) {
