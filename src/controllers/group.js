@@ -4,7 +4,6 @@ const GroupModel = require("../models/group");
 const TagModel = require("../models/tag");
 const ChatMessageModel = require("../models/chatMessage");
 const UserModel = require("../models/user");
-const { emitSystemMessage } = require("../services/socket");
 const { processChatData } = require("../services/socket");
 
 const create = async (req, res) => {
@@ -55,7 +54,7 @@ const create = async (req, res) => {
       onOffline: req.body.onOffline,
       tags: req.body.tags,
       pic: req.body.pic,
-      maxMembers: req.body.participants || 0,
+      maxMembers: req.body.maxMembers || 0,
       date: req.body.date,
       location: req.body.location,
       description: req.body.description,
@@ -173,11 +172,11 @@ const joinGroup = async (req, res) => {
     if (group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is already in group.",
+        message: "You are already in this group.",
       });
     }
     //is group full?
-    if (group.maxMembers <= group.groupMembers.length) {
+    if (group.maxMembers != 0 && group.maxMembers <= group.groupMembers.length) {
       return res.status(400).json({
         error: "Bad Request",
         message: "This group is full.",
@@ -190,7 +189,7 @@ const joinGroup = async (req, res) => {
     if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "You can't join any more groups",
+        message: "You have reached your active group limit.",
       });
     }
 
@@ -214,7 +213,6 @@ const joinGroup = async (req, res) => {
         chat: newChat,
       }
     );
-    emitSystemMessage(newChat);
     return res.status(200).json("Joined group!");
   } catch (err) {
     return res.status(500).json({
@@ -238,7 +236,7 @@ const leaveGroup = async (req, res) => {
     if (!group.groupMembers.includes(userId)) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "User is not in this group.",
+        message: "Your are not a member of this group.",
       });
     }
     //is user last man standing?
@@ -246,7 +244,7 @@ const leaveGroup = async (req, res) => {
       //group owner tries to leave as only member left
       return res.status(400).json({
         error: "Bad Request",
-        message: "You cannot leave the group if you're the only one in it.",
+        message: "You can't leave a group when you are the only member.",
       });
     }
 
@@ -267,7 +265,7 @@ const leaveGroup = async (req, res) => {
     newChat.push(newLeaveMessage._id);
 
     //user is group owner
-    if (group.groupOwner === userId) {
+    if (String(group.groupOwner) === userId) {
       //ownership transfer message
       const newOwner = await UserModel.findById(updatedGroupMembers[0]).exec();
       const ownerMessage = {
@@ -286,7 +284,6 @@ const leaveGroup = async (req, res) => {
           chat: newChat,
         }
       );
-      emitSystemMessage(newChat);
       return res.status(200).json("Left group!");
     } else {
       //user is not group owner
@@ -297,9 +294,53 @@ const leaveGroup = async (req, res) => {
           chat: newChat,
         }
       );
-      emitSystemMessage(newChat);
       return res.status(200).json("Left group!");
     }
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
+const editGroup = async (req, res) => {
+  //initialization
+  const id = req.params.groupId;
+  const userId = req.userId;
+
+  try {
+    //get group and user
+    const group = await GroupModel.findById(id).populate("groupMembers", "username premium.active").populate("groupOwner", "username");
+
+    //is user in group?
+    if (!group.groupMembers.some((member) => member._id.equals(userId))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "User is not in this group.",
+      });
+    }
+    //is user group owner?
+    if(!String(group.groupOwner) === userId) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "User is not the group owner and cannot edit this group.",
+      });
+    }
+
+    group.groupName = req.body.groupName;
+    group.city = req.body.city;
+    group.onOffline = req.body.onOffline;
+    group.tags = req.body.tags;
+    group.pic = req.body.pic;
+    group.location = req.body.location;
+    group.maxMembers = req.body.maxMembers || 0;
+    group.date = req.body.date;
+    group.description = req.body.description;
+
+    await group.save();
+
+    return res.status(200).json(group);
   } catch (err) {
     return res.status(500).json({
       error: "Internal server error",
@@ -350,5 +391,6 @@ module.exports = {
   recommended,
   joinGroup,
   leaveGroup,
+  editGroup,
   getProcessedGroupChat,
 };

@@ -8,7 +8,7 @@ async function isValidGroupName(name) {
 
 async function isValidDate(date) {
   const now = new Date();
-  return date && date > now;
+  return (date && date > now) || date === null;
 }
 
 module.exports = {

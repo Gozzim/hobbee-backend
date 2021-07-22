@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 const api = require("./src/api");
 const config = require("./src/config");
+const { runPeriodicTasks } = require("./src/services/task_schedule");
 const { socketConnection } = require("./src/services/socket");
 
 // Set the port to the API.
@@ -29,6 +30,7 @@ mongoose
   });
 
 server.on("listening", () => {
+  runPeriodicTasks();
   console.log(`API is running in port ${config.port}`);
 });
 
