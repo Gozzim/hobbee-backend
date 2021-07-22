@@ -1,12 +1,11 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const { isValidEmail, isValidUsername } = require("../validators/auth");
+const { isValidEmail, isValidUsername, isValidDateOfBirth } = require("../validators/auth");
 
 // Define the user schema
 const UserSchema = new mongoose.Schema({
   username: {
-    // TODO: check if username exists with lowerCase to avoid Testname and testname for example
     type: String,
     unique: true,
     required: true,
@@ -19,6 +18,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
+    select: false,
     validate: {
       validator: isValidEmail,
       message: "Invalid Email",
@@ -32,6 +32,16 @@ const UserSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
     required: true,
+    select: false,
+    validate: {
+      validator: isValidDateOfBirth,
+      message: "Invalid date of birth"
+    },
+  },
+  city: {
+    type: String,
+    required: true,
+    select: false,
   },
   avatar: String,
   hobbies: [
@@ -42,8 +52,24 @@ const UserSchema = new mongoose.Schema({
     },
   ],
   premium: {
-    type: Boolean,
-    default: false,
+    active: {
+      type: Boolean,
+      default: false,
+    },
+    canceled: Boolean,
+    subscription: {
+      id: {
+        type: String,
+        unique: true,
+        sparse: true,
+        select: false,
+      },
+      plan: {
+        type: String,
+        select: false,
+      },
+      expiration: Date,
+    },
   },
 });
 

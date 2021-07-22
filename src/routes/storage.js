@@ -32,4 +32,16 @@ router.post(
 
 router.get("/file/view/:fileId", StorageController.viewFile);
 
+router.post(
+  "/feedback/:id",
+  middlewares.checkAuthentication,
+  StorageController.handleFeedbackSubmission
+);
+
+router.get(
+  "/feedback/:id",
+  middlewares.checkAuthentication,
+  StorageController.handleFeedbackRequest
+);
+
 module.exports = router;

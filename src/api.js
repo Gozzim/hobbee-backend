@@ -4,12 +4,15 @@ const express = require("express");
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
+const cors = require('cors');
 
 const middlewares = require("./middlewares");
 
 const auth = require("./routes/auth");
 const group = require("./routes/group");
 const storage = require("./routes/storage");
+const payment = require("./routes/payment");
+const user = require("./routes/user");
 
 const api = express();
 
@@ -23,6 +26,7 @@ api.use(
 api.use(bodyParser.json({ limit: "25mb" }));
 api.use(bodyParser.urlencoded({ extended: false }));
 api.use(middlewares.allowCrossDomain);
+api.use(cors());
 
 // Basic route
 api.get("/api", (req, res) => {
@@ -35,5 +39,7 @@ api.get("/api", (req, res) => {
 api.use("/api/auth", auth);
 api.use("/api/group", group);
 api.use("/api/storage", storage);
+api.use("/api/payment", payment);
+api.use("/api/user", user);
 
 module.exports = api;
