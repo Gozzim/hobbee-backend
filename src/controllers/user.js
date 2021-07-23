@@ -194,6 +194,61 @@ const updateMe = async (req, res) => {
   }
 };
 
+const handlePassChange = async (req, res) => {
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["current", "password"]);
+  if (error) {
+    return error;
+  }
+
+  try {
+    const user = await UserModel.findById(req.userId).select("username email password");
+
+    // Check if current password is correct
+    const isCorrectCurrent = bcrypt.compareSync(
+      req.body.current,
+      user.password
+    );
+    if (!isCorrectCurrent) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: ERRORS.invalidCredentials,
+      });
+    }
+
+    // Password validation before hashing
+    const isPassValid = await isValidPassword(req.body.password);
+    if (!isPassValid) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: ERRORS.invalidPassword,
+      });
+    }
+
+    // hash the password before storing it in the database
+    const hashedPassword = bcrypt.hashSync(req.body.password, 8);
+    if (!user) {
+      // Should never happen
+      return res.status(404).json({
+        error: "Not Found",
+        message: ERRORS.userNotFound,
+      });
+    }
+    user.password = hashedPassword;
+
+    // Finalize modifications and send confirmation mail
+    await user.save();
+    await sendGenericMail(user, "Hobb.ee Password Changed", "Your password has successfully been changed.");
+
+    res.status(200).json();
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
 const createUserReport = async (req, res) => {
   try {
     // get users from database
@@ -237,5 +292,6 @@ module.exports = {
   me,
   getUser,
   updateMe,
+  handlePassChange,
   createUserReport,
 };
