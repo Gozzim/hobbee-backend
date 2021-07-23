@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>$Title</title>
+    <title><%= title %></title>
     <style>
         /* -------------------------------------
             GLOBAL RESETS
@@ -325,11 +325,11 @@
                 line-height: inherit;
             }
             .btn-primary table td:hover {
-                background-color: #34495e !important;
+                background-color: #FFCC00 !important;
             }
             .btn-primary a:hover {
-                background-color: #34495e !important;
-                border-color: #34495e !important;
+                background-color: #FFCC00 !important;
+                border-color: #FFCC00 !important;
             }
         }
 
@@ -352,10 +352,10 @@
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                        <h2><b>$Title</b></h2>
-                                        <p>Hi $User,</p>
+                                        <h2><b><%= title %></b></h2>
+                                        <p>Hi <%= user %>,</p>
                                         <p>Thank you for using the Hobb.ee</p>
-                                        <p>$TextA</p>
+                                        <p><%= content %></p>
                                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                                             <tbody>
                                             <tr>
@@ -373,8 +373,7 @@
                                             </tbody>
                                         </table>
                                         <br>
-                                        <p>$TextB</p>
-                                        <p>Best regards</p>
+                                        <p>Best regards,</p>
                                         <p>Your Hobb.ee team</p>
                                     </td>
                                 </tr>
@@ -392,11 +391,10 @@
                         <tr>
                             <td class="content-block">
                                 <span class="apple-link">Hobb.ee, Martin-Behaim-Str. 2, 81373 München</span>
-<!--                                <br> Don't like these emails? <a href="http://i.imgur.com/CScmqnj.gif">Unsubscribe</a>.-->
                             </td>
                         </tr>
                         <tr>
-                            <a href="https://hobb.ee"><IMG SRC="hobbee_white.png" alt="Hobb.ee Logo"></a>
+                            <a href="https://hobb.ee"><img src="https://hobb.ee/images/hobbee_cream.png" title="Hobb.ee logo" alt="Hobb.ee Logo"></a>
                         </tr>
                         <tr>
                             <!--<td class="content-block powered-by">
