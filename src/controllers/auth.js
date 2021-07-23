@@ -8,7 +8,7 @@ const { renewSubscription } = require("./payment");
 const { ERRORS } = require("../shared/Constants");
 const { isValidEmail } = require("../validators/auth");
 const { errorHandler } = require("../middlewares");
-const { sendAccountConfirmation } = require("../services/mail");
+const { sendGenericMail } = require("../services/mail");
 const { isValidPassword } = require("../validators/auth");
 
 const login = async (req, res) => {
@@ -121,7 +121,7 @@ const register = async (req, res) => {
     let retUser = await UserModel.create(user);
 
     // Send Email to user
-    await sendAccountConfirmation(user);
+    await sendGenericMail(retUser, "Welcome to Hobb.ee!", "Start looking for hobbees now!");
 
     // create a token
     const token = await generateToken(retUser);

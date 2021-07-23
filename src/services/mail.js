@@ -2,6 +2,13 @@
 
 const nodemailer = require("nodemailer");
 const config = require("../config");
+const { htmlToText } = require("html-to-text");
+const fs = require("fs");
+const ejs = require("ejs");
+const path = require("path");
+
+// Template resource: https://github.com/leemunroe/responsive-html-email-template
+const template = fs.readFileSync(path.join(__dirname, "./mailTemplates/mailTemplate.html"), "utf8");
 
 const transport = nodemailer.createTransport({
   host: config.mailDomain,
@@ -12,51 +19,62 @@ const transport = nodemailer.createTransport({
   },
 });
 
-async function sendMail(to, subject, content) {
+async function sendMail(to, subject, html) {
+  const text = htmlToText(html);
   const mailOptions = {
     from: "Hobb.ee Support <contact@hobb.ee>",
     to: to,
     subject: subject,
-    text: content,
+    text: text,
+    html: html,
   };
-
   return transport.sendMail(mailOptions, (error, info) => {
     if (error) {
       return console.log(error);
     }
-    console.log("Message sent: %s", info.messageId);
+    console.log("Message sent with id: " + info.messageId);
   });
 }
 
+async function sendGenericMail(user, title, content) {
+  const html = ejs.render(template, {
+    title,
+    user: user.username,
+    content,
+  });
+  await sendMail(user.email, title, html);
+}
+
 async function sendResetPassword(user, link) {
-  const content ="Hi, " + user.username + " you can change your Password under " + link; // TODO Mail Template
-  await sendMail(user.email, "Change Hobb.ee Password", content);
-}
-
-async function sendConfirmChange(user) {
-  const content = "Hello " + user.username + ", your account information has successfully been changed."; // TODO Mail Template
-  await sendMail(user.email, "Your Hobb.ee Account", content);
-}
-
-async function sendAccountConfirmation(user) {
-  const content = "Hello " + user.username + " and welcome to Hobb.ee!"; // TODO Mail Template
-  await sendMail(user.email, "Welcome to Hobb.ee!", content);
+  const html = ejs.render(template, {
+    title: "Hobb.ee Account Recovery",
+    user: user.username,
+    content: "You can change your Password under " + link,
+  });
+  await sendMail(user.email, "Hobb.ee Account Recovery", html);
 }
 
 async function sendFeedbackForm(user, feedback) {
-  const content = "Hello " + user.username + ", please provide feedback about your experience under " + feedback; // TODO Mail Template
-  await sendMail(user.email, "How was your experience?", content);
+  const html = ejs.render(template, {
+    title: "Hobb.ee Feedback",
+    user: user.username,
+    content: "Please provide feedback about your experience under " + feedback,
+  });
+  await sendMail(user.email, "How was your experience?", html);
 }
 
-async function sendPremiumConfirmation(user, receipt) {
-  const content = "Hello " + user.username + ", thank you for buying a premium subscription with Hobb.ee." + receipt; // TODO Mail Template
-  await sendMail(user.email, "Hobb.ee Premium", content);
+async function sendPremiumConfirmation(user) {
+  const html = ejs.render(template, {
+    title: "Hobb.ee Premium",
+    user: user.username,
+    content: "Thank you for buying a premium subscription with Hobb.ee.",
+  });
+  await sendMail(user.email, "Hobb.ee Premium", html);
 }
 
 module.exports = {
+  sendGenericMail,
   sendResetPassword,
-  sendConfirmChange,
-  sendAccountConfirmation,
   sendFeedbackForm,
   sendPremiumConfirmation,
 };
