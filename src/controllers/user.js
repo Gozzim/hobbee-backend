@@ -121,7 +121,7 @@ const me = async (req, res) => {
     // get own user from database
     const user = await UserModel.findById(req.userId)
       .select(
-        "username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.canceled premium.subscription.plan"
+        "username email dateOfBirth city avatar hobbies premium.active premium.subscription.expiration premium.canceled premium.subscription.plan"
       )
       .exec();
 
