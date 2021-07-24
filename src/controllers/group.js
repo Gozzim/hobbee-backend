@@ -55,8 +55,8 @@ const create = async (req, res) => {
         },
       ],
     })
-        .countDocuments()
-        .exec();
+      .countDocuments()
+      .exec();
     if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
@@ -109,7 +109,11 @@ const getTags = async (req, res) => {
 
 const getGroups = async (req, res) => {
   try {
-    const groups = await GroupModel.find().exec();
+    const groups = await GroupModel.find()
+      .lean()
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username premium.active")
+      .exec();
     return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
@@ -154,7 +158,11 @@ const getGroup = async (req, res) => {
 
 const mine = async (req, res) => {
   try {
-    const groups = await GroupModel.find({ groupMembers: req.userId }).exec();
+    const groups = await GroupModel.find({ groupMembers: req.userId })
+      .lean()
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username premium.active")
+      .exec();
     return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
@@ -175,7 +183,11 @@ const recommended = async (req, res) => {
         $elemMatch: { $in: user.hobbies },
       },
       city: user.city,
-    }).exec();
+    })
+      .lean()
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username premium.active")
+      .exec();
     return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
@@ -191,7 +203,11 @@ const inMyArea = async (req, res) => {
     // Find all groups that have a tag that matches the user's hobbies
     const groups = await GroupModel.find({
       city: user.city,
-    }).exec();
+    })
+      .lean()
+      .populate("groupMembers", "username premium.active")
+      .populate("groupOwner", "username premium.active")
+      .exec();
     return res.status(200).json(sortGroups(groups));
   } catch (err) {
     return res.status(500).json({
@@ -492,7 +508,7 @@ const getProcessedGroupChat = async (req, res) => {
 function sortGroups(groups) {
   const groupsWithTimestamp = groups.map((group) => {
     return {
-      ...group._doc,
+      ...group,
       timestamp: mongoose.Types.ObjectId(group._id).getTimestamp(),
     };
   });
