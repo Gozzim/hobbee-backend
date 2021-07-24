@@ -4,8 +4,8 @@ const {
   cancelPayPalSubscriptionRequest,
 } = require("../services/payment");
 const UserModel = require("../models/user");
-const { getPlanFromId } = require("../shared/helpers");
-const { generateToken } = require("../shared/helpers");
+const { sendPremiumConfirmation } = require("../services/mail");
+const { getPlanFromId, generateToken } = require("../shared/helpers");
 const { errorHandler } = require("../middlewares");
 
 const renewSubscription = async (subscriptionId) => {
@@ -43,7 +43,7 @@ const handlePremiumRequest = async (req, res) => {
   }
 
   try {
-    const user = await UserModel.findById(req.userId);
+    const user = await UserModel.findById(req.userId).select("username email premium.active");
     if (!user) {
       // Should never happen
       return res.status(404).json({
@@ -76,6 +76,8 @@ const handlePremiumRequest = async (req, res) => {
       "Amount": subscription.billing_info.last_payment.amount.value + " " + subscription.billing_info.last_payment.amount.currency_code,
       "Renewal date": renewal,
     };
+
+    await sendPremiumConfirmation(user);
 
     const token = await generateToken(user);
     return res.status(200).json({ token: token, receipt: receipt });

@@ -6,7 +6,7 @@ const UserModel = require("../models/user");
 const UserReportModel = require("../models/userReport");
 const { ERRORS } = require("../shared/Constants");
 const ResetTokenModel = require("../models/resetToken");
-const { sendConfirmChange, sendResetPassword } = require("../services/mail");
+const { sendGenericMail, sendResetPassword } = require("../services/mail");
 const { generateToken } = require("../shared/helpers");
 const { isValidPassword } = require("../validators/auth");
 const { errorHandler } = require("../middlewares");
@@ -101,7 +101,7 @@ const resetPassword = async (req, res) => {
     // Finalize modifications and send confirmation mail
     await user.save();
     await resetToken.delete();
-    await sendConfirmChange(user);
+    await sendGenericMail(user, "Hobb.ee Account Information Changed", "Your account information has successfully been changed.");
 
     // Generate JWT token to log user in again right away
     const token = await generateToken(user);
