@@ -57,7 +57,7 @@ const UserSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
     },
-    canceled: Boolean,
+    cancelled: Boolean,
     subscription: {
       id: {
         type: String,

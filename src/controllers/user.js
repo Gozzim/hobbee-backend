@@ -121,7 +121,7 @@ const me = async (req, res) => {
     // get own user from database
     const user = await UserModel.findById(req.userId)
       .select(
-        "username email dateOfBirth city avatar hobbies premium.active premium.subscription.expiration premium.canceled premium.subscription.plan"
+        "username email dateOfBirth city avatar hobbies premium.active premium.subscription.expiration premium.cancelled premium.subscription.plan"
       )
       .exec();
 
@@ -171,7 +171,7 @@ const updateMe = async (req, res) => {
   }
 
   try {
-    let user = await UserModel.findById(req.userId).select("username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.canceled premium.subscription.plan");
+    let user = await UserModel.findById(req.userId).select("username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.cancelled premium.subscription.plan");
 
     if (!user) {
       return res.status(404).json({
