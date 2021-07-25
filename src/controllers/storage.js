@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const FileModel = require("../models/file");
 const NotificationModel = require("../models/notification");
 const FeedbackModel = require("../models/feedback");
+const TagModel = require("../models/tag");
 const { errorHandler } = require("../middlewares");
 
 const getUserNotifications = async (req, res) => {
@@ -148,6 +149,18 @@ const handleFeedbackRequest = async (req, res) => {
   }
 };
 
+const getTags = async (req, res) => {
+  try {
+    const tags = await TagModel.find({}).exec();
+    return res.status(200).json(tags);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Internal server error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getUserNotifications,
   setNotificationRead,
@@ -156,4 +169,5 @@ module.exports = {
   viewFile,
   handleFeedbackSubmission,
   handleFeedbackRequest,
+  getTags,
 };

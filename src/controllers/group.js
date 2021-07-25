@@ -1,42 +1,17 @@
 const mongoose = require("mongoose");
 
 const GroupModel = require("../models/group");
-const TagModel = require("../models/tag");
 const ChatMessageModel = require("../models/chatMessage");
 const UserModel = require("../models/user");
+const { errorHandler } = require("../middlewares");
 const { processChatData } = require("../services/socket");
 
 const create = async (req, res) => {
-  if (!Object.prototype.hasOwnProperty.call(req.body, "groupName"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a groupName property",
-    });
-
-  if (!Object.prototype.hasOwnProperty.call(req.body, "city"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a city property",
-    });
-  if (!Object.prototype.hasOwnProperty.call(req.body, "onOffline"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a onOffline property",
-    });
-
-  if (
-    !Object.prototype.hasOwnProperty.call(req.body, "tags") ||
-    !Array.isArray(req.body.tags)
-  )
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a tags property",
-    });
-  if (!Object.prototype.hasOwnProperty.call(req.body, "pic"))
-    return res.status(400).json({
-      error: "Bad Request",
-      message: "The request body must contain a pic property",
-    });
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["groupName", "city", "onOffline", "tags", "pic"]);
+  if (error) {
+    return error;
+  }
 
   try {
     const user = await UserModel.findById(req.userId).exec();
@@ -95,19 +70,7 @@ const create = async (req, res) => {
   }
 };
 
-const getTags = async (req, res) => {
-  try {
-    const tags = await TagModel.find({}).exec();
-    return res.status(200).json(tags);
-  } catch (err) {
-    return res.status(500).json({
-      error: "Internal server error",
-      message: err.message,
-    });
-  }
-};
-
-const getGroups = async (req, res) => {
+const getAll = async (req, res) => {
   try {
     const groups = await GroupModel.find({deleted: false})
       .lean()
@@ -520,8 +483,7 @@ function sortGroups(groups) {
 
 module.exports = {
   create,
-  getTags,
-  getGroups,
+  getAll,
   getGroup,
   mine,
   recommended,
