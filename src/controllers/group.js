@@ -35,7 +35,7 @@ const create = async (req, res) => {
     if (!user.premium.active && groupsWithUser >= 5) {
       return res.status(400).json({
         error: "Bad Request",
-        message: "You have reached your active group limit.",
+        message: "You have reached your active group limit. Get HOBB.EE Premium for infinite groups!",
       });
     }
 
