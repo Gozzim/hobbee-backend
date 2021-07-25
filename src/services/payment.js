@@ -70,7 +70,6 @@ const cancelPayPalSubscriptionRequest = async (subscriptionId) => {
 
     return resp;
   } catch (e) {
-    console.log(e.response.data)
     return e.message;
   }
 };

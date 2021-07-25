@@ -109,7 +109,6 @@ const resetPassword = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    console.log(err.message);
     return res.status(500).json({
       error: "Internal server error",
     });
@@ -152,7 +151,6 @@ const getUser = async (req, res) => {
         message: ERRORS.userNotFound,
       });
     }
-    console.log(user);
     return res.status(200).json(user);
   } catch (err) {
     return res.status(500).json({
@@ -166,7 +164,6 @@ const getUser = async (req, res) => {
 const updateMe = async (req, res) => {
   // Check if body contains required properties
   const error = errorHandler(req, res, ["username", "city", "hobbies"]);
-  console.log(req.body);
   if (error) {
     return error;
   }
@@ -191,7 +188,6 @@ const updateMe = async (req, res) => {
 
     await user.save();
 
-    console.log(user);
     return res.status(200).json(user);
   } catch (err) {
     return res.status(500).json({
@@ -249,7 +245,6 @@ const handlePassChange = async (req, res) => {
 
     res.status(200).json();
   } catch (err) {
-    console.log(err.message);
     return res.status(500).json({
       error: "Internal server error",
     });

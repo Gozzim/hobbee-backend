@@ -32,7 +32,7 @@ const handlePremiumRequest = async (req, res) => {
     return error;
   }
 
-  // TODO: What about outstanding_balance?
+
   const subscription = await payPalSubscriptionRequest(req.body.subscriptionID);
 
   if (!subscription || subscription.status !== "ACTIVE") {
@@ -50,11 +50,6 @@ const handlePremiumRequest = async (req, res) => {
         error: "Not Found",
         message: ERRORS.userNotFound,
       });
-    }
-
-    if (user.premium.active) {
-      // TODO: Handle cancel payment
-      console.log("Already has premium");
     }
 
     user.premium.subscription.id = subscription.id;
