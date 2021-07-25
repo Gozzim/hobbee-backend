@@ -107,25 +107,26 @@ const socketConnection = async (server) => {
 
         // Iterate over group members and find members not currently in chat
         const clients = Array.from(io.sockets.adapter.rooms.get(data.groupId));
+        const clientIds = clients.map(
+          (client) => io.sockets.sockets.get(client).username
+        );
         group.groupMembers.map(async (member) => {
-          clients.map(async (client) => {
-            if (!member.equals(io.sockets.sockets.get(client).username)) {
-              // Update or create notification for this chat
-              await NotificationModel.updateOne(
-                {
-                  user: member,
-                  group: group._id,
-                  notificationType: "Chat",
-                },
-                {
-                  content: "New chat message: " + data.message,
-                  link: `/group/${data.groupId}`,
-                  date: data.timestamp,
-                },
-                { upsert: true }
-              );
-            }
-          });
+          if (!clientIds.includes(member.toString())) {
+            // Update or create notification for this chat
+            await NotificationModel.updateOne(
+              {
+                user: member,
+                group: group._id,
+                notificationType: "Chat",
+              },
+              {
+                content: "New chat message: " + data.message,
+                link: `/group/${data.groupId}`,
+                date: data.timestamp,
+              },
+              { upsert: true }
+            );
+          }
         });
       } catch (e) {
         console.log(e);

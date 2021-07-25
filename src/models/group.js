@@ -11,7 +11,7 @@ const GroupSchema = new mongoose.Schema({
     validate: {
       validator: isValidGroupName,
       message: "Invalid Groupname",
-    }
+    },
   },
   groupOwner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -55,12 +55,16 @@ const GroupSchema = new mongoose.Schema({
     validate: {
       validator: isValidDate,
       message: "Invalid Date",
-    }
+    },
   },
   location: String,
-  description: String,
+  description: {
+    type: String,
+    maxlength: 1000,
+  },
   chat: [
-    { // TODO: Should not be selected by default
+    {
+      // TODO: Should not be selected by default
       type: mongoose.Schema.Types.ObjectId,
       ref: "ChatMessage",
       required: true,
@@ -73,7 +77,7 @@ const GroupSchema = new mongoose.Schema({
   deleted: {
     type: Boolean,
     default: false,
-  }
+  },
 });
 
 GroupSchema.set("versionKey", false);
