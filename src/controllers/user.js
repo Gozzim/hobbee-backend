@@ -165,7 +165,7 @@ const getUser = async (req, res) => {
 
 const updateMe = async (req, res) => {
   // Check if body contains required properties
-  const error = errorHandler(req, res, ["username", "avatar","city","hobbies"]);
+  const error = errorHandler(req, res, ["username", "city", "hobbies"]);
   console.log(req.body);
   if (error) {
     return error;
@@ -182,9 +182,12 @@ const updateMe = async (req, res) => {
     }
 
     user.username = req.body.username;
-    user.avatar = req.body.avatar;
     user.city = req.body.city;
     user.hobbies = req.body.hobbies;
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "avatar")) {
+      user.avatar = req.body.avatar;
+    }
 
     await user.save();
 
