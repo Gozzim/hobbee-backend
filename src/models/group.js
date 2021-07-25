@@ -64,7 +64,6 @@ const GroupSchema = new mongoose.Schema({
   },
   chat: [
     {
-      // TODO: Should not be selected by default
       type: mongoose.Schema.Types.ObjectId,
       ref: "ChatMessage",
       required: true,

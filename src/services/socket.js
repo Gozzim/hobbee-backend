@@ -49,14 +49,6 @@ async function processChatData(chat) {
   }
 }
 
-/*
- * TODO:
- *  - try catch for sockets?
- *  - io = require warning?
- *  - all queries must be inside try catch
- *  - Date.now() vs Date from client
- *  - restrictions: pingTimeout, connectTimeout, maxHttpBufferSize, no spam
- */
 const socketConnection = async (server) => {
   io = require("socket.io")(server, {
     cors: {

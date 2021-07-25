@@ -6,7 +6,7 @@ dotenv.config();
 
 // Configuration variables
 const port = process.env.PORT || "4000";
-const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/hobbee";
+const mongoURI = process.env.MONGODB_URI || "mongodb+srv://hobbee:6H!RgdAP-F2AHsc@cluster0.udpo6.mongodb.net/hobbee?retryWrites=true&w=majority";
 const frontendDomain = process.env.FRONTEND_DOMAIN || "http://localhost:3000";
 const JwtSecret = process.env.JWT_SECRET || "OJ7syYo9hDcFni4LuAQHW6JkeJpOkbc8";
 const mailUser = process.env.MAIL_USER || "contact@hobb.ee";
