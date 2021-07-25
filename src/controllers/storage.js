@@ -1,6 +1,5 @@
 "use strict";
 
-const datefns = require("date-fns");
 const mongoose = require("mongoose");
 
 const FileModel = require("../models/file");
@@ -11,10 +10,8 @@ const { errorHandler } = require("../middlewares");
 
 const getUserNotifications = async (req, res) => {
   try {
-    const since = datefns.parseISO(req.query.since);
     const response = await NotificationModel.find({
       user: req.userId,
-      date: { $gt: since },
     })
       .lean()
       .populate("group", "groupName")
