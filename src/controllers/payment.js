@@ -60,7 +60,7 @@ const handlePremiumRequest = async (req, res) => {
     user.premium.subscription.id = subscription.id;
     user.premium.subscription.plan = subscription.plan_id;
     user.premium.subscription.expiration = subscription.billing_info.next_billing_time;
-    user.premium.canceled = false;
+    user.premium.cancelled = false;
     user.premium.active = true;
     await user.save();
 
@@ -107,7 +107,7 @@ const cancelSubscription = async (req, res) => {
 
       // If cancel was successful
       if (cancelReq.status === 204) {
-        user.premium.canceled = true;
+        user.premium.cancelled = true;
         await user.save();
         return res.status(200).json();
       }
@@ -115,7 +115,7 @@ const cancelSubscription = async (req, res) => {
 
     return res.status(400).json({
       error: "Bad Request",
-      message: "Subscription could not be canceled",
+      message: "Subscription could not be cancelled",
     });
   } catch (e) {
     return res.status(500).json({

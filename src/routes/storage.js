@@ -44,4 +44,6 @@ router.get(
   StorageController.handleFeedbackRequest
 );
 
+router.get("/tags", StorageController.getTags);
+
 module.exports = router;

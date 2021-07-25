@@ -14,6 +14,7 @@ const groupMetCheck = async () => {
     const groups = await GroupModel.find({
       date: { $lt: Date.now() },
       feedbackSent: false,
+      deleted: false,
     })
       .lean()
       .populate("groupMembers", "username email");
@@ -51,6 +52,7 @@ const groupReminderCheck = async () => {
         $gt: Date.now(),
         $lt: new Date(Date.now() + GROUP_CHECK_PERIOD),
       },
+      deleted: false,
     }).exec();
 
     groups.map((group) => {

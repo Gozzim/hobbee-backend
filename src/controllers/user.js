@@ -121,7 +121,7 @@ const me = async (req, res) => {
     // get own user from database
     const user = await UserModel.findById(req.userId)
       .select(
-        "username email dateOfBirth city avatar hobbies premium.active premium.subscription.expiration premium.canceled premium.subscription.plan"
+        "username email dateOfBirth city avatar hobbies premium.active premium.subscription.expiration premium.cancelled premium.subscription.plan"
       )
       .exec();
 
@@ -165,14 +165,14 @@ const getUser = async (req, res) => {
 
 const updateMe = async (req, res) => {
   // Check if body contains required properties
-  const error = errorHandler(req, res, ["username", "avatar","city","hobbies"]);
+  const error = errorHandler(req, res, ["username", "city", "hobbies"]);
   console.log(req.body);
   if (error) {
     return error;
   }
 
   try {
-    let user = await UserModel.findById(req.userId).select("username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.canceled premium.subscription.plan");
+    let user = await UserModel.findById(req.userId).select("username email dateOfBirth city avatar hobbies premium.active premium.expiration premium.cancelled premium.subscription.plan");
 
     if (!user) {
       return res.status(404).json({
@@ -182,9 +182,12 @@ const updateMe = async (req, res) => {
     }
 
     user.username = req.body.username;
-    user.avatar = req.body.avatar;
     user.city = req.body.city;
     user.hobbies = req.body.hobbies;
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "avatar")) {
+      user.avatar = req.body.avatar;
+    }
 
     await user.save();
 

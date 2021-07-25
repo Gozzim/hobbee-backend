@@ -5,9 +5,8 @@ const GroupController = require("../controllers/group");
 const middlewares = require("../middlewares");
 
 router.post("/create", middlewares.checkAuthentication, GroupController.create); // prettier-ignore
-router.get("/tags", GroupController.getTags); // prettier-ignore
-router.get("/groups", GroupController.getGroups); // prettier-ignore
-router.get("/group/:groupId", middlewares.extractUserId, GroupController.getGroup); // prettier-ignore
+router.get("/all", GroupController.getAll); // prettier-ignore
+router.get("/id/:groupId", middlewares.extractUserId, GroupController.getGroup); // prettier-ignore
 router.get("/mine", middlewares.checkAuthentication, GroupController.mine); // prettier-ignore
 router.get("/recommended", middlewares.checkAuthentication, GroupController.recommended); // prettier-ignore
 router.get("/in-my-area", middlewares.checkAuthentication, GroupController.inMyArea); // prettier-ignore

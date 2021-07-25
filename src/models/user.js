@@ -50,6 +50,7 @@ const UserSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tag",
+      required: true,
     },
   ],
   premium: {
@@ -57,7 +58,7 @@ const UserSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
     },
-    canceled: Boolean,
+    cancelled: Boolean,
     subscription: {
       id: {
         type: String,

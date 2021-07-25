@@ -64,7 +64,7 @@ const cancelPayPalSubscriptionRequest = async (subscriptionId) => {
   try {
     const resp = await axios.post(
       "billing/subscriptions/" + subscriptionId + "/cancel",
-      { reason: "User canceled subscription" },
+      { reason: "User cancelled subscription" },
       reqConfig
     );
 
