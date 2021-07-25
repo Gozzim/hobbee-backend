@@ -109,7 +109,7 @@ const getTags = async (req, res) => {
 
 const getGroups = async (req, res) => {
   try {
-    const groups = await GroupModel.find()
+    const groups = await GroupModel.find({deleted: false})
       .lean()
       .populate("groupMembers", "username premium.active")
       .populate("groupOwner", "username premium.active")
@@ -158,7 +158,7 @@ const getGroup = async (req, res) => {
 
 const mine = async (req, res) => {
   try {
-    const groups = await GroupModel.find({ groupMembers: req.userId })
+    const groups = await GroupModel.find({ groupMembers: req.userId , deleted: false})
       .lean()
       .populate("groupMembers", "username premium.active")
       .populate("groupOwner", "username premium.active")

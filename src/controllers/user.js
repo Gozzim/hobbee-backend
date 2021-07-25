@@ -165,7 +165,8 @@ const getUser = async (req, res) => {
 
 const updateMe = async (req, res) => {
   // Check if body contains required properties
-  const error = errorHandler(req, res, ["username", "email", "dateOfBirth"]);
+  const error = errorHandler(req, res, ["username", "avatar","city","hobbies"]);
+  console.log(req.body);
   if (error) {
     return error;
   }
@@ -181,10 +182,13 @@ const updateMe = async (req, res) => {
     }
 
     user.username = req.body.username;
-    user.email = req.body.email;
-    user.dateOfBirth = req.body.dateOfBirth;
+    user.avatar = req.body.avatar;
+    user.city = req.body.city;
+    user.hobbies = req.body.hobbies;
+
     await user.save();
 
+    console.log(user);
     return res.status(200).json(user);
   } catch (err) {
     return res.status(500).json({

@@ -41,9 +41,10 @@ const UserSchema = new mongoose.Schema({
   city: {
     type: String,
     required: true,
-    select: false,
   },
-  avatar: String,
+  avatar: {
+    type: String,
+  },
   hobbies: [
     // Implicitly defaults to empty array []
     {
