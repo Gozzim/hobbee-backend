@@ -5,11 +5,11 @@
   "description": "Hobb.ee Backend as service",
   "homepage": "https://hobb.ee",
   "bugs": {
-    "url": "https://gitlab.lrz.de/seba-master-2021/team-01/backend/-/issues"
+    "url": "https://github.com/Gozzim/hobbee-backend/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.lrz.de/seba-master-2021/team-01/backend.git"
+    "url": "https://github.com/Gozzim/hobbee-backend.git"
   },
   "author": "Hobb.ee",
   "main": "index.js",

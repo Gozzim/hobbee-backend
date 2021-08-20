@@ -8,7 +8,7 @@ The web application was built as part of the SEBA-Master course 2021 at TUM by t
 Hobb.ee is a social networking service that helps individuals meet new people with common interests by recommending activity-oriented groups based on their personal preferences.
 
 
-The frontend can be found [here](https://gitlab.lrz.de/seba-master-2021/team-01/frontend/)
+The frontend can be found [here](https://github.com/Gozzim/hobbee-frontend)
 
 
 Follow this readme to build and run the hobb.ee backend locally.
@@ -32,14 +32,14 @@ Only for backend:
 
 ### Clone Hobb.ee-Project-backend
 
-Clone the [hobb.ee-backend](https://gitlab.lrz.de/seba-master-2021/team-01/backend/) repository using [git](http://git-scm.com/):
+Clone the [hobb.ee-backend](https://github.com/Gozzim/hobbee-backend) repository using [git](http://git-scm.com/):
 
 Navigate to the root-folder that you want to clone your backend into.
 A file structure for the project we recommend would be the following:
 ```
 - /root-folder/
-    - /root-folder/frontend/
-    - /root-folder/backend/
+    - /root-folder/hobbee-frontend/
+    - /root-folder/hobbee-backend/
     - /root-folder/database/
 ```
 
@@ -47,22 +47,23 @@ Create and navigate to your root-folder.
 
 
 
-```
-git clone https://gitlab.lrz.de/seba-master-2021/team-01/frontend.git
+```bash
+git clone https://github.com/Gozzim/hobbee-backend.git
 ```
 
 
 Go to your backend folder via command line:
-```
-cd path/to/root-folder/backend
+```bash
+cd path/to/root-folder/hobbee-backend
 ```
 
 **Install node dependencies**
 
-```
+```bash
 npm install
 ```
 
+**Adjust the `.env` parameters with your config** 
 
 
 ## Start the project
@@ -76,62 +77,12 @@ Simply enter
 npm start
 ```
 
-
-## (optional) Run with Local Database
-
-
-If you decide to use a local database you can do the following:
-
-**Set up your database**
-
-* Create a new directory where your database will be stored
-    * we learned that it's a good idea to separate data and business logic - so the data directory should be in a different place than your app
-* We suggest this folder structure
-```
-- /root-folder/
-    - /root-folder/frontend/
-    - /root-folder/backend/
-    - /root-folder/database/
-```
-* Start the database server
-```
-mongod --dbpath "/root-folder/database"
-```
-
-In the ```.env``` file you need to change this line
-
-```
-MONGODB_URI="mongodb+srv://hobbee:6H!RgdAP-F2AHsc@cluster0.udpo6.mongodb.net/hobbee?retryWrites=true&w=majority"
-
-```
-to
-```
-MONGODB_URI="mongodb://localhost:27017/hobbee"
-```
-
 **Imports**
 Now you need to import various data into your database via the following script
 
-
-```
+```bash
 npm run import
 ```
-
-
-
-
-## Testing Premium - Using Paypal sandbox for hobb.ee
-
-
-For our Paypal Integration we are uing the Paypal Sandbox.
-If you want to test this integration you can follow the "Buy Premium" steps after you logged in and enter the following Paypal Customer Credentials:
-
-```
-CustomerAccount:
-   Login: sb-4347ask6835997@personal.example.com
-   Pass: 8emswG&w
-```
-
 
 Happy testing!
 
