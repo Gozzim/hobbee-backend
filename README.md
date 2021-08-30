@@ -1,6 +1,7 @@
 # <img src="https://hobb.ee/static/media/hobbee_white.7e5bc008.svg" height="75" alt="logo">
 
 # Seba Team 01 Hobb.ee-web-application-backend
+[![CodeFactor](https://www.codefactor.io/repository/github/gozzim/hobbee-backend/badge)](https://www.codefactor.io/repository/github/gozzim/hobbee-backend)
 
 This repository contains the backend for Hobb.ee.
 The web application was built as part of the SEBA-Master course 2021 at TUM by team 01.
