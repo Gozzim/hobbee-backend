@@ -5,5 +5,5 @@
 db/
 /.env
 
-/test*/
+/tests/
 *.bak
