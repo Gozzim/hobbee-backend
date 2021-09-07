@@ -1,6 +1,7 @@
 # <img src="https://hobb.ee/static/media/hobbee_white.7e5bc008.svg" height="75" alt="logo">
 
 # Seba Team 01 Hobb.ee-web-application-backend
+[![run-test](https://github.com/Gozzim/hobbee-backend/actions/workflows/test.yml/badge.svg)](https://github.com/Gozzim/hobbee-backend/actions/workflows/test.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/gozzim/hobbee-backend/badge)](https://www.codefactor.io/repository/github/gozzim/hobbee-backend)
 
 This repository contains the backend for Hobb.ee.
