@@ -252,6 +252,12 @@ const handlePassChange = async (req, res) => {
 };
 
 const createUserReport = async (req, res) => {
+  // Check if body contains required properties
+  const error = errorHandler(req, res, ["reportForm"]);
+  if (error) {
+    return error;
+  }
+
   try {
     // get users from database
     let reportedUser = await UserModel.findOne({username: req.params.username}).collation({ locale: "en", strength: 2 }).exec();
