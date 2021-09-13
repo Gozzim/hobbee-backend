@@ -28,12 +28,7 @@ async function sendMail(to, subject, html) {
     text: text,
     html: html,
   };
-  return transport.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return console.log(error);
-    }
-    console.log("Message sent with id: " + info.messageId);
-  });
+  return transport.sendMail(mailOptions);
 }
 
 async function sendGenericMail(user, title, content) {
